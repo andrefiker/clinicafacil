@@ -4,8 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Clínica Fácil</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&display=swap');
+@font-face{font-family:'Outfit';src:local('Outfit');font-display:swap}
+@font-face{font-family:'Fraunces';src:local('Fraunces');font-display:swap}
 :root{
   --bg:#F4F2EE;--surface:#FFFFFE;--surfaceAlt:#F0EDE8;--surfaceHover:#EAE6E0;
   --primary:#2D2A26;--primaryLight:#3D3A36;--primaryFaded:#F4F2EE;--primaryGlow:rgba(45,42,38,.06);
@@ -98,8 +104,8 @@ textarea{resize:vertical;min-height:70px}
 .cid-tag{background:var(--primaryFaded);color:var(--primary);border:1px solid var(--successBorder)}.cid-tag button{background:none;border:none;color:var(--primary);cursor:pointer;font-size:14px;padding:0;line-height:1;opacity:.7}.cid-tag button:hover{opacity:1}
 .med-tag{background:var(--surfaceAlt);color:var(--textSecondary);border:1px solid var(--border)}.med-tag button{background:none;border:none;color:var(--danger);cursor:pointer;font-size:14px;padding:0;line-height:1;opacity:.7}.med-tag button:hover{opacity:1}
 /* Tab bar — pill-style navigation */
-.tab-bar{display:flex;gap:4px;background:transparent;border-bottom:none;padding:4px 20px 12px;flex-shrink:0;position:relative;.tab-bar
-.tab-item{text-align:center;padding:9px 22px;font-size:14px;font-weight:600;color:var(--textMuted);cursor:pointer;border-radius:var(--radiusFull);transition:var(--transition);white-space:nowrap;border:none}
+.tab-bar{display:flex;gap:4px;background:transparent;border-bottom:none;padding:4px 12px 12px;flex-shrink:0;position:relative;overflow:visible;justify-content:center}
+.tab-item{text-align:center;padding:9px 0;font-size:14px;font-weight:600;color:var(--textMuted);cursor:pointer;border-radius:var(--radiusFull);transition:var(--transition);white-space:nowrap;border:none;flex:1}
 .tab-item:hover{color:var(--text);background:rgba(0,0,0,.04)}
 .tab-item.active{color:#fff;background:linear-gradient(135deg,#2D2A26,#4A4540);font-weight:700;border-radius:var(--radiusFull);box-shadow:0 2px 8px rgba(45,42,38,.2)}
 .tab-more{position:relative}
@@ -141,6 +147,20 @@ textarea{resize:vertical;min-height:70px}
 .dp-day{padding:11px 4px;border-radius:var(--radiusSm);cursor:pointer;font-size:14px;border:none;background:none;color:var(--text);font-weight:500;transition:var(--transition)}.dp-day:hover{background:var(--surfaceAlt)}.dp-day.today{font-weight:700;color:var(--primary);background:var(--primaryFaded)}.dp-day.sel{background:var(--primary);color:#fff;font-weight:700;box-shadow:0 2px 8px rgba(27,107,80,.3)}.dp-day.other{color:var(--textFaint)}
 .tp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.tp-btn{padding:12px 4px;border-radius:var(--radiusSm);cursor:pointer;font-size:15px;font-weight:600;border:1.5px solid var(--border);background:var(--surface);color:var(--text);text-align:center;transition:var(--transition)}.tp-btn:hover{background:var(--surfaceAlt);border-color:var(--textFaint)}.tp-btn.sel{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 2px 8px rgba(27,107,80,.25)}
 .tp-label{text-align:center;font-size:13px;color:var(--textMuted);margin-bottom:12px;font-weight:600}
+
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(255,254,252,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid rgba(28,25,23,.06);padding:6px 0 env(safe-area-inset-bottom,8px);justify-content:space-around}
+.bnav-item{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 12px;cursor:pointer;transition:var(--transition);border-radius:12px;min-width:56px}
+.bnav-item:hover{background:rgba(28,25,23,.04)}
+.bnav-item.active .bnav-icon{color:var(--text);transform:scale(1.1)}
+.bnav-item.active .bnav-label{color:var(--text);font-weight:700}
+.bnav-icon{font-size:22px;line-height:1;color:var(--textLight);transition:var(--transition)}
+.bnav-label{font-size:10px;font-weight:600;color:var(--textLight);letter-spacing:.02em;transition:var(--transition)}
+.tools-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.tool-card{padding:24px 20px;border-radius:var(--radiusLg);cursor:pointer;transition:var(--transition);text-align:center;background:var(--gradCard);box-shadow:0 0 0 1px rgba(28,25,23,.05),0 2px 8px rgba(28,25,23,.03)}
+.tool-card:hover{transform:translateY(-2px);box-shadow:0 0 0 1px rgba(28,25,23,.08),0 8px 24px rgba(28,25,23,.07)}
+.tool-card .tool-icon{font-size:32px;margin-bottom:12px;display:block}
+.tool-card .tool-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px}
+.tool-card .tool-desc{font-size:12px;color:var(--textMuted);line-height:1.4}
 /* Animations */
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}.animate{animation:fadeIn .3s cubic-bezier(.22,1,.36,1)}
 @keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
@@ -150,27 +170,21 @@ textarea{resize:vertical;min-height:70px}
 @media(max-width:767px){.stats-grid{grid-template-columns:1fr 1fr}.grid2{grid-template-columns:1fr}.content{padding:16px}.topbar{padding:10px 16px}.tab-bar{padding:4px 8px}.ptabs{margin:16px -16px;padding:0 16px}}
 
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 <div class="shell">
 <div class="topbar">
 <span class="logo">Clínica Fácil</span><span id="welcomeMsg" style="font-size:11px;color:var(--textMuted);margin-left:8px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px"></span>
 <div style="flex:1"></div>
-<button class="btn btn-g" onclick="openSearch()" title="Buscar" style="font-size:17px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:var(--radiusSm)">&#9906;</button>
+<span id="syncDot" style="display:none;width:8px;height:8px;border-radius:50%;background:#9ca3af;flex-shrink:0" title="Google Drive"></span><button class="btn btn-g" onclick="openSearch()" title="Buscar" style="font-size:17px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:var(--radiusSm)">&#9906;</button>
 <button class="btn btn-g" onclick="go('config')" title="Configurações" style="font-size:17px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:var(--radiusSm)">&#9881;</button>
 </div>
+
 <div class="tab-bar" id="tabBar">
-<div class="tab-item active" onclick="go('home')" data-tab="home">Início</div>
 <div class="tab-item" onclick="go('pacientes')" data-tab="pacientes">Pacientes</div>
-<div class="tab-item" onclick="go('prontuarios')" data-tab="prontuarios">Prontuários</div>
-<div class="tab-item" onclick="go('financeiro')" data-tab="financeiro">Financeiro</div>
-<div class="tab-item tab-more" onclick="toggleToolsMenu(event)" data-tab="tools">&#8943; Mais</div>
-</div>
-<div class="tools-dropdown" id="toolsDropdown">
-<div class="tools-item" onclick="go('documentos');hideToolsMenu()">&#128196; Documentos</div>
-<div class="tools-item" onclick="go('testes');hideToolsMenu()">&#128203; Testes</div>
-<div class="tools-item" onclick="go('guia');hideToolsMenu()">&#128138; Guia Farm.</div>
+<div class="tab-item active" onclick="go('prontuarios')" data-tab="prontuarios">Prontuários</div>
+<div class="tab-item" onclick="go('financeiro')" data-tab="financeiro">R$</div>
+<div class="tab-item" onclick="go('ferramentas')" data-tab="ferramentas">&#128736;</div>
 </div>
 <div class="content"><div class="content-inner" id="app"></div></div>
 </div>
@@ -178,6 +192,14 @@ textarea{resize:vertical;min-height:70px}
 <div class="picker-overlay" id="dpOverlay"><div class="picker-box" id="dpBox"></div></div>
 <div class="picker-overlay" id="tpOverlay"><div class="picker-box" id="tpBox"></div></div>
 <div class="search-overlay" id="searchOverlay" onclick="if(event.target===this)closeSearch()"><div class="search-box"><input type="text" id="globalSearchInput" placeholder="Buscar..." oninput="doGlobalSearch(this.value)"><div class="search-results" id="searchResults"></div></div></div>
+
+<div class="bottom-nav" id="bottomNav">
+<div class="bnav-item active" onclick="go('pacientes')" data-tab="pacientes"><span class="bnav-icon">👥</span><span class="bnav-label">Pacientes</span></div>
+<div class="bnav-item" onclick="go('prontuarios')" data-tab="prontuarios"><span class="bnav-icon">📋</span><span class="bnav-label">Prontuários</span></div>
+<div class="bnav-item" onclick="go('financeiro')" data-tab="financeiro"><span class="bnav-icon">💰</span><span class="bnav-label">Financeiro</span></div>
+<div class="bnav-item" onclick="go('ferramentas')" data-tab="ferramentas"><span class="bnav-icon">🧰</span><span class="bnav-label">Ferramentas</span></div>
+<div class="bnav-item" onclick="go('config')" data-tab="config"><span class="bnav-icon">⚙️</span><span class="bnav-label">Config</span></div>
+</div>
 <div class="toast" id="toast"></div>
 <script>
 // === DATA ARRAYS ===
@@ -668,92 +690,149 @@ var DOC_TEMPLATES=[
 {id:'solicitacao_convenio',nome:'Solicitação para Convênio',corpo:'SOLICITAÇÃO DE REEMBOLSO / AUTORIZAÇÃO DE TRATAMENTO\n\nAo setor de autorizações,\n\nSolicito autorização/reembolso para acompanhamento psicológico do(a) beneficiário(a) abaixo identificado(a).\n\nDADOS DO BENEFICIÁRIO\nNome: {{NOME_PACIENTE}}\nData de nascimento: {{DATA_NASCIMENTO}}\nNúmero da carteirinha: [número do convênio]\nPlano: [nome do plano]\n\nDADOS DO PROFISSIONAL\nNome: [nome do profissional]\nConselho: [CRP]\nCBOS: 2515-10 (Psicólogo Clínico)\nCPF: [CPF do profissional]\n\nINFORMAÇÕES CLÍNICAS\nHipótese diagnóstica (CID): {{CIDS}}\nData de início do tratamento: {{DATA_INICIO}}\nTipo de atendimento: Psicoterapia individual\nFrequência solicitada: {{FREQUENCIA}}\nQuantidade de sessões solicitadas: {{QTD_SOLICITADA}} sessões\nValor por sessão: {{VALOR_SESSAO}}\n\nJUSTIFICATIVA CLÍNICA\n{{QUEIXAS}}\n\nO(a) paciente apresenta quadro clínico que demanda acompanhamento psicoterapêutico continuado, sendo fundamental a manutenção do tratamento para estabilização e melhora do quadro apresentado.\n\nCódigo do procedimento (TUSS): 50000470 - Sessão de psicoterapia individual\n\nAguardo deferimento.\n\n\n_________________________________\n{{NOME_PROFISSIONAL}}\nCRP: {{CRP_PROFISSIONAL}}'}
 ];
 
-// === Data Layer (Supabase Cloud) ===
-var SB_URL='https://kizwfarfzyuodhugkler.supabase.co';
-var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtpendmYXJmenl1b2RodWdrbGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5ODU0NDksImV4cCI6MjA4ODU2MTQ0OX0.0wa0SH7-tvXxQo6KBE2J6O3I-2tEDYgdSkfqMrhMFF0';
-var sb=window.supabase.createClient(SB_URL,SB_KEY);
-var D={pacientes:[],sessoes:[],pagamentos:[],documentos:[],testes:[],evolucoes:[]};
-var PROF={nome:'',crp:''};
-var CURRENT_USER=null;
-var _saveTimer=null;
+// === Data Layer (localStorage + Supabase cloud) ===
+var SUPA_URL='https://kizwfarfzyuodhugkler.supabase.co';
+var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtpendmYXJmenl1b2RodWdrbGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5ODU0NDksImV4cCI6MjA4ODU2MTQ0OX0.0wa0SH7-tvXxQo6KBE2J6O3I-2tEDYgdSkfqMrhMFF0';
+var supaClient=null,supaUser=null,_cloudSyncTimer=null;
 
-function uid(){return crypto.randomUUID?crypto.randomUUID():'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){var r=Math.random()*16|0;return(c==='x'?r:(r&0x3|0x8)).toString(16)})}
+function initSupabase(){
+  if(typeof supabase==='undefined'||!supabase.createClient)return;
+  try{supaClient=supabase.createClient(SUPA_URL,SUPA_KEY)}catch(e){console.error('Supabase init error:',e)}
+}
 
-// === Auth ===
-async function checkLogin(){
-  document.getElementById('loginOverlay').style.display='block';
-  document.getElementById('loginOverlay').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh"><div style="text-align:center"><div style="font-family:var(--fontD);font-size:36px;font-style:italic;color:var(--text);margin-bottom:12px">Clínica Fácil</div><div style="color:var(--textMuted)">Conectando...</div></div></div>';
+async function supaLogin(email,password){
+  if(!supaClient){initSupabase();if(!supaClient)throw new Error('Supabase não disponível')}
+  var res=await supaClient.auth.signInWithPassword({email:email,password:password});
+  if(res.error)throw new Error(res.error.message);
+  supaUser=res.data.user;
+  localStorage.setItem('supa_session',JSON.stringify(res.data.session));
+  toast('Login: '+supaUser.email);
+  await cloudPull();// pull cloud data on login
+  renderApp();
+  return supaUser;
+}
+
+async function supaSignup(email,password){
+  if(!supaClient){initSupabase();if(!supaClient)throw new Error('Supabase não disponível')}
+  var res=await supaClient.auth.signUp({email:email,password:password});
+  if(res.error)throw new Error(res.error.message);
+  supaUser=res.data.user;
+  if(res.data.session)localStorage.setItem('supa_session',JSON.stringify(res.data.session));
+  toast('Conta criada! Verifique seu e-mail.');
+  return supaUser;
+}
+
+async function supaLogout(){
+  if(supaClient)await supaClient.auth.signOut();
+  supaUser=null;localStorage.removeItem('supa_session');
+  toast('Desconectado da nuvem');renderApp();
+}
+
+async function supaRestoreSession(){
+  if(!supaClient)return;
   try{
-    var sess=await sb.auth.getSession();
-    if(sess.data.session){
-      CURRENT_USER=sess.data.session.user;
-      await loadProfile();
-      await loadAllData();
-      document.getElementById('loginOverlay').style.display='none';
-      syncPayments();renderApp();
-      return;
+    var sess=localStorage.getItem('supa_session');
+    if(sess){
+      var parsed=JSON.parse(sess);
+      var res=await supaClient.auth.setSession({access_token:parsed.access_token,refresh_token:parsed.refresh_token});
+      if(res.data&&res.data.user){supaUser=res.data.user;if(res.data.session)localStorage.setItem('supa_session',JSON.stringify(res.data.session))}
     }
-  }catch(e){console.error('Auth check:',e)}
-  showLoginForm();
+  }catch(e){console.error('Session restore:',e)}
 }
-function showLoginForm(){
-  document.getElementById('loginOverlay').innerHTML='<div style="max-width:420px;margin:60px auto;padding:30px"><div style="text-align:center;margin-bottom:32px"><h1 style="font-family:var(--fontD);font-size:46px;color:var(--text);font-style:italic">Clínica Fácil</h1><p style="color:var(--textMuted);margin-top:8px;font-size:14px">Acesse sua conta ou crie uma nova</p></div><div class="card" style="padding:24px"><div class="field"><label>Email</label><input type="email" id="loginEmail" placeholder="seu@email.com"></div><div class="field"><label>Senha</label><input type="password" id="loginSenha" placeholder="Mínimo 6 caracteres" minlength="6"></div><div id="loginExtra" style="display:none"><div class="field"><label>Nome completo</label><input type="text" id="profNome" placeholder="Ex: Dra. Maria Silva"></div><div class="field"><label>CRP</label><input type="text" id="profCRP" placeholder="Ex: 06/123456"></div></div><button class="btn btn-p" style="width:100%;padding:14px;font-size:16px;margin-top:12px" id="loginBtn" onclick="doLogin()">Entrar</button><div style="text-align:center;margin-top:12px"><button class="btn btn-g" style="font-size:13px" id="toggleRegBtn" onclick="toggleRegister()">Criar conta nova</button></div><div id="loginMsg" style="text-align:center;margin-top:12px;font-size:13px;color:var(--danger)"></div></div></div>';
-  document.getElementById('loginOverlay').style.display='block';
-}
-var isRegistering=false;
-function toggleRegister(){
-  isRegistering=!isRegistering;
-  document.getElementById('loginExtra').style.display=isRegistering?'block':'none';
-  document.getElementById('loginBtn').textContent=isRegistering?'Criar Conta':'Entrar';
-  document.getElementById('toggleRegBtn').textContent=isRegistering?'Já tenho conta':'Criar conta nova';
-}
-async function doLogin(){
-  var email=document.getElementById('loginEmail').value.trim();
-  var senha=document.getElementById('loginSenha').value;
-  var msg=document.getElementById('loginMsg');
-  if(!email||!senha){msg.textContent='Preencha email e senha';return}
-  if(senha.length<6){msg.textContent='Senha deve ter pelo menos 6 caracteres';return}
-  msg.textContent='Aguarde...';msg.style.color='var(--textMuted)';
-  try{
-    if(isRegistering){
-      var nome=(document.getElementById('profNome').value||'').trim();
-      var crp=(document.getElementById('profCRP').value||'').trim();
-      if(!nome||!crp){msg.textContent='Preencha nome e CRP';msg.style.color='var(--danger)';return}
-      var res=await sb.auth.signUp({email:email,password:senha});
-      if(res.error)throw res.error;
-      CURRENT_USER=res.data.user;
-      await sb.from('profiles').insert({user_id:CURRENT_USER.id,nome:nome,crp:crp});
-      PROF={nome:nome,crp:crp};
-    } else {
-      var res=await sb.auth.signInWithPassword({email:email,password:senha});
-      if(res.error)throw res.error;
-      CURRENT_USER=res.data.user;
-      await loadProfile();
-    }
-    await loadAllData();
-    document.getElementById('loginOverlay').style.display='none';
-    syncPayments();renderApp();
-  }catch(e){
-    msg.textContent=e.message||'Erro ao autenticar';msg.style.color='var(--danger)';
-  }
-}
-async function loadProfile(){
-  if(!CURRENT_USER)return;
-  var res=await sb.from('profiles').select('*').eq('user_id',CURRENT_USER.id).single();
-  if(res.data){PROF={nome:res.data.nome,crp:res.data.crp}}
-}
-async function logout(){
-  await sb.auth.signOut();
-  CURRENT_USER=null;PROF={nome:'',crp:''};
-  D={pacientes:[],sessoes:[],pagamentos:[],documentos:[],testes:[],evolucoes:[]};
-  showLoginForm();
-}
-function saveProf(){
-  if(!CURRENT_USER)return;
-  sb.from('profiles').update({nome:PROF.nome,crp:PROF.crp}).eq('user_id',CURRENT_USER.id).then(function(){});
-}
-function saveLogin(){doLogin()}
 
+// Cloud push — save all data to Supabase
+async function cloudPush(){
+  if(!supaClient||!supaUser)return;
+  try{
+    var uid=supaUser.id;
+    // Upsert pacientes
+    if(D.pacientes&&D.pacientes.length){
+      var rows=D.pacientes.map(function(p){return{id:p.id,user_id:uid,nome:p.nome,cpf:p.cpf||'',telefone:p.telefone||'',email:p.email||'',nascimento:p.nascimento||'',queixas:p.queixas||'',modalidade:p.modalidade||'sessao',valor:p.valor||0,ativo:p.ativo!==false,cids:p.cids||[],meds:p.meds||[],plano:p.plano||null,relatorio_ia:p.relatorioIA||null}});
+      await supaClient.from('pacientes').upsert(rows,{onConflict:'id'});
+    }
+    // Upsert evolucoes (skip large arquivo data to save space)
+    if(D.evolucoes&&D.evolucoes.length){
+      var rows=D.evolucoes.map(function(e){return{id:e.id,user_id:uid,paciente_id:e.pacienteId,data:e.data,hora:e.hora||'',humor:e.humor||0,ansiedade:e.ansiedade||0,soap:e.soap||null,texto:e.texto||'',tags:e.tags||[],transcricao:null,arquivos:null,analise_ia:e.analiseIA||null}});
+      // Batch in chunks of 50
+      for(var i=0;i<rows.length;i+=50){
+        await supaClient.from('evolucoes').upsert(rows.slice(i,i+50),{onConflict:'id'});
+      }
+    }
+    // Upsert pagamentos
+    if(D.pagamentos&&D.pagamentos.length){
+      var rows=D.pagamentos.map(function(p){return{id:p.id,user_id:uid,paciente_id:p.pacienteId,sessao_id:p.sessaoId||null,tipo:p.tipo||'sessao',mes:p.mes||'',data:p.data,valor:p.valor||0,status:p.status||'pendente',obs:p.obs||''}});
+      for(var i=0;i<rows.length;i+=50){
+        await supaClient.from('pagamentos').upsert(rows.slice(i,i+50),{onConflict:'id'});
+      }
+    }
+    // Upsert sessoes
+    if(D.sessoes&&D.sessoes.length){
+      var rows=D.sessoes.map(function(s){return{id:s.id,user_id:uid,paciente_id:s.pacienteId,data:s.data,hora:s.hora||'',obs:s.obs||''}});
+      await supaClient.from('sessoes').upsert(rows,{onConflict:'id'});
+    }
+    // Save profile + config
+    await supaClient.from('profiles').upsert({id:uid,nome:PROF.nome,crp:PROF.crp,email:supaUser.email},{onConflict:'id'});
+    console.log('Cloud push OK');
+  }catch(e){console.error('Cloud push error:',e)}
+}
+
+// Cloud pull — load from Supabase into localStorage
+async function cloudPull(){
+  if(!supaClient||!supaUser)return;
+  try{
+    var uid=supaUser.id;
+    // Pull pacientes
+    var res=await supaClient.from('pacientes').select('*').eq('user_id',uid);
+    if(res.data&&res.data.length){
+      D.pacientes=res.data.map(function(r){return{id:r.id,nome:r.nome,cpf:r.cpf,telefone:r.telefone,email:r.email,nascimento:r.nascimento,queixas:r.queixas,modalidade:r.modalidade,valor:r.valor,ativo:r.ativo,cids:r.cids||[],meds:r.meds||[],plano:r.plano||{},relatorioIA:r.relatorio_ia}});
+    }
+    // Pull evolucoes
+    var res=await supaClient.from('evolucoes').select('*').eq('user_id',uid);
+    if(res.data&&res.data.length){
+      // Merge: keep local arquivos (not synced), update everything else
+      var localMap={};(D.evolucoes||[]).forEach(function(e){localMap[e.id]=e});
+      D.evolucoes=res.data.map(function(r){
+        var local=localMap[r.id];
+        return{id:r.id,pacienteId:r.paciente_id,data:r.data,hora:r.hora,humor:r.humor,ansiedade:r.ansiedade,soap:r.soap,texto:r.texto,tags:r.tags||[],transcricao:r.transcricao||null,arquivos:(local&&local.arquivos)||null,analiseIA:r.analise_ia}
+      });
+    }
+    // Pull pagamentos
+    var res=await supaClient.from('pagamentos').select('*').eq('user_id',uid);
+    if(res.data){
+      D.pagamentos=res.data.map(function(r){return{id:r.id,pacienteId:r.paciente_id,sessaoId:r.sessao_id,tipo:r.tipo,mes:r.mes,data:r.data,valor:r.valor,status:r.status,obs:r.obs}});
+    }
+    // Pull sessoes
+    var res=await supaClient.from('sessoes').select('*').eq('user_id',uid);
+    if(res.data){
+      D.sessoes=res.data.map(function(r){return{id:r.id,pacienteId:r.paciente_id,data:r.data,hora:r.hora,obs:r.obs}});
+    }
+    // Pull profile
+    var res=await supaClient.from('profiles').select('*').eq('id',uid).single();
+    if(res.data){PROF.nome=res.data.nome||PROF.nome;PROF.crp=res.data.crp||PROF.crp;saveProf()}
+    // Save locally
+    localStorage.setItem(KEY,JSON.stringify(D));
+    console.log('Cloud pull OK: '+D.pacientes.length+' pac, '+D.evolucoes.length+' evo');
+  }catch(e){console.error('Cloud pull error:',e)}
+}
+
+function scheduleCloudPush(){
+  if(_cloudSyncTimer)clearTimeout(_cloudSyncTimer);
+  _cloudSyncTimer=setTimeout(function(){cloudPush()},5000);// 5s debounce
+}
+var KEY='clinica_facil_v2',D={pacientes:[],sessoes:[],pagamentos:[],documentos:[],testes:[],evolucoes:[]};
+var PROF_KEY='clinica_facil_prof',PROF={nome:'',crp:''};
+try{var pp=localStorage.getItem(PROF_KEY);if(pp)PROF=JSON.parse(pp)}catch(e){}
+function saveProf(){try{localStorage.setItem(PROF_KEY,JSON.stringify(PROF))}catch(e){}}
+
+function saveLogin(){
+  var n=document.getElementById('profNome').value.trim();
+  var c=document.getElementById('profCRP').value.trim();
+  if(!n){alert('Informe seu nome');return}
+  if(!c){alert('Informe seu CRP');return}
+  PROF.nome=n;PROF.crp=c;saveProf();
+  document.getElementById('loginOverlay').style.display='none';
+  renderApp();
+}
 function editProf(){
   PROF.nome=document.getElementById('editProfNome').value.trim();
   PROF.crp=document.getElementById('editProfCRP').value.trim();
@@ -762,51 +841,40 @@ function editProf(){
 function editProfModal(){
   showModal('<h3 style="font-family:var(--fontD);margin-bottom:16px">Editar Perfil Profissional</h3><div class="field"><label>Nome completo</label><input type="text" id="editProfNome" value="'+PROF.nome+'"></div><div class="field"><label>CRP</label><input type="text" id="editProfCRP" value="'+PROF.crp+'"></div><div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px"><button class="btn btn-o" onclick="hideModal()">Cancelar</button><button class="btn btn-p" onclick="editProf()">Salvar</button></div>');
 }
-
-// === Cloud Data Load/Save ===
-var TABLE_MAP={
-  pacientes:{table:'pacientes',mapTo:function(r){return{id:r.id,nome:r.nome,telefone:r.telefone||'',email:r.email||'',cpf:r.cpf||'',nascimento:r.nascimento||'',modalidade:r.modalidade||'sessao',valor:parseFloat(r.valor)||0,cids:r.cids||[],meds:r.meds||[],obs:r.obs||'',ativo:r.ativo!==false}},mapFrom:function(o){return{id:o.id,user_id:CURRENT_USER.id,nome:o.nome,telefone:o.telefone||'',email:o.email||'',cpf:o.cpf||'',nascimento:o.nascimento||'',modalidade:o.modalidade||'sessao',valor:o.valor||0,cids:o.cids||[],meds:o.meds||[],obs:o.obs||'',ativo:o.ativo!==false}}},
-  sessoes:{table:'sessoes',mapTo:function(r){return{id:r.id,pacienteId:r.paciente_id,data:r.data,hora:r.hora||'',obs:r.obs||''}},mapFrom:function(o){return{id:o.id,user_id:CURRENT_USER.id,paciente_id:o.pacienteId,data:o.data,hora:o.hora||'',obs:o.obs||''}}},
-  evolucoes:{table:'evolucoes',mapTo:function(r){return{id:r.id,pacienteId:r.paciente_id,data:r.data,hora:r.hora||'',humor:r.humor||0,ansiedade:r.ansiedade||0,soap:r.soap_s?{s:r.soap_s,o:r.soap_o,a:r.soap_a,p:r.soap_p}:null,texto:r.texto||'',tags:r.tags||[],transcricao:r.transcricao||null,arquivos:r.arquivos||null}},mapFrom:function(o){return{id:o.id,user_id:CURRENT_USER.id,paciente_id:o.pacienteId,data:o.data,hora:o.hora||'',humor:o.humor||0,ansiedade:o.ansiedade||0,soap_s:o.soap?o.soap.s:'',soap_o:o.soap?o.soap.o:'',soap_a:o.soap?o.soap.a:'',soap_p:o.soap?o.soap.p:'',texto:o.texto||'',tags:o.tags||[],transcricao:o.transcricao||'',arquivos:o.arquivos||[]}}},
-  pagamentos:{table:'pagamentos',mapTo:function(r){return{id:r.id,pacienteId:r.paciente_id,sessaoId:r.sessao_id||null,data:r.data,valor:parseFloat(r.valor)||0,status:r.status||'pendente',obs:r.obs||'',tipo:r.tipo||'',mes:r.mes||''}},mapFrom:function(o){return{id:o.id,user_id:CURRENT_USER.id,paciente_id:o.pacienteId,sessao_id:o.sessaoId||null,data:o.data,valor:o.valor||0,status:o.status||'pendente',obs:o.obs||'',tipo:o.tipo||'',mes:o.mes||''}}},
-  documentos:{table:'documentos',mapTo:function(r){return{id:r.id,pacienteId:r.paciente_id,tipo:r.tipo||'',titulo:r.titulo||'',conteudo:r.conteudo||'',createdAt:r.created_at}},mapFrom:function(o){return{id:o.id,user_id:CURRENT_USER.id,paciente_id:o.pacienteId,tipo:o.tipo||'',titulo:o.titulo||'',conteudo:o.conteudo||''}}},
-  testes:{table:'testes',mapTo:function(r){return{id:r.id,pacienteId:r.paciente_id,data:r.data,teste_nome:r.teste_nome||'',score:parseFloat(r.score)||0,nivel:r.nivel||'',cor:r.cor||'',descricao:r.descricao||'',perfil:r.perfil||''}},mapFrom:function(o){return{id:o.id,user_id:CURRENT_USER.id,paciente_id:o.pacienteId,data:o.data,teste_nome:o.teste_nome||'',score:o.score||0,nivel:o.nivel||'',cor:o.cor||'',descricao:o.descricao||'',perfil:o.perfil||''}}}
-};
-async function loadAllData(){
-  if(!CURRENT_USER)return;
-  var keys=Object.keys(TABLE_MAP);
-  for(var i=0;i<keys.length;i++){
-    var k=keys[i],m=TABLE_MAP[k];
-    var res=await sb.from(m.table).select('*').eq('user_id',CURRENT_USER.id);
-    D[k]=(res.data||[]).map(m.mapTo);
+function checkLogin(){
+  if(!PROF.nome||!PROF.crp){
+    document.getElementById('loginOverlay').style.display='block';
+    if(PROF.nome)document.getElementById('profNome').value=PROF.nome;
+    if(PROF.crp)document.getElementById('profCRP').value=PROF.crp;
   }
 }
+try{
+  // Version migration — never nuke, always migrate
+  var s=localStorage.getItem(KEY);
+  if(s){
+    try{D=Object.assign({pacientes:[],sessoes:[],pagamentos:[],documentos:[],testes:[],evolucoes:[]},JSON.parse(s))}catch(e){}
+  }
+  // Ensure evolucoes array exists (v4→v5 migration)
+  if(!D.evolucoes)D.evolucoes=[];
+  // Ensure planoTerapeutico exists on patients
+  D.pacientes.forEach(function(p){if(!p.plano)p.plano={}});
+  localStorage.setItem('cf_version','v5.2');
+}catch(e){}
 function save(){
-  if(!CURRENT_USER)return;
-  clearTimeout(_saveTimer);
-  _saveTimer=setTimeout(function(){cloudSave()},800);
-  toast('Salvando...');
-}
-async function cloudSave(){
-  if(!CURRENT_USER)return;
   try{
-    var keys=Object.keys(TABLE_MAP);
-    for(var i=0;i<keys.length;i++){
-      var k=keys[i],m=TABLE_MAP[k];
-      // Delete all user's rows then re-insert
-      await sb.from(m.table).delete().eq('user_id',CURRENT_USER.id);
-      if(D[k].length>0){
-        var rows=D[k].map(m.mapFrom);
-        // Insert in batches of 50
-        for(var j=0;j<rows.length;j+=50){
-          var batch=rows.slice(j,j+50);
-          var res=await sb.from(m.table).insert(batch);
-          if(res.error)console.error('Insert error ('+k+'):',res.error);
-        }
-      }
+    var data=JSON.stringify(D);
+    var sizeKB=Math.round(data.length/1024);
+    if(sizeKB>4000){toast('⚠ Dados ocupam '+sizeKB+'KB — limite próximo!')}
+    localStorage.setItem(KEY,data);
+  }catch(e){
+    if(e.name==='QuotaExceededError'||e.code===22){
+      alert('Armazenamento cheio! Exporte um backup.');
     }
-  }catch(e){console.error('cloudSave error:',e)}
+  }
+  scheduleAutoSync();
+  scheduleCloudPush();// sync to Supabase
 }
+function uid(){return Date.now().toString(36)+Math.random().toString(36).substr(2,9)}
 function fmt$(v){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v||0)}
 function fmtD(d){if(!d)return'';return new Date(d+'T12:00:00').toLocaleDateString('pt-BR')}
 function fmtDT(d){if(!d)return'';return new Date(d).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})}
@@ -817,7 +885,7 @@ function getNome(pid){var p=D.pacientes.find(function(x){return x.id===pid});ret
 function toast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(function(){t.classList.remove('show')},1800)}
 
 // === Navigation ===
-var page='home',editId=null,pacS='',finMes=today().substring(0,7),finF='todos',finS='',finView='lista';
+var page='prontuarios',editId=null,pacS='',finMes=today().substring(0,7),finF='todos',finS='',finView='lista';
 var calY=new Date().getFullYear(),calM=new Date().getMonth(),calD=new Date().getDate();
 var profPacId=null,profTab='evolucao';
 var docPacId='',docTipoSel='',docPreviewMode=false,docEditedContent='';
@@ -834,20 +902,21 @@ function updateTabs(){
     else{t.classList.toggle('active',t.dataset.tab===page)}
   });
 }
-function toggleToolsMenu(e){e&&e.stopPropagation();var dd=document.getElementById('toolsDropdown');if(dd.classList.contains('show')){dd.classList.remove('show');return}var btn=e.currentTarget||e.target;var rect=btn.getBoundingClientRect();dd.style.top=(rect.bottom+4)+'px';dd.style.right=(window.innerWidth-rect.right)+'px';dd.classList.add('show')}
-function hideToolsMenu(){document.getElementById('toolsDropdown').classList.remove('show')}
+function toggleToolsMenu(e){e&&e.stopPropagation();var dd=document.getElementById('toolsDropdown');if(!dd)return;if(dd.style.display==='block'){dd.style.display='none';dd.classList.remove('show');return}var btn=e.currentTarget||e.target;var rect=btn.getBoundingClientRect();dd.style.top=(rect.bottom+4)+'px';dd.style.right=(window.innerWidth-rect.right)+'px';dd.style.display='block';dd.classList.add('show')}
+function hideToolsMenu(){var dd=document.getElementById('toolsDropdown');if(!dd)return;dd.style.display='none';dd.classList.remove('show')}
 document.addEventListener('click',function(e){if(!e.target.closest('.tab-more')&&!e.target.closest('.tools-dropdown'))hideToolsMenu()})
-function renderApp(){var el=document.getElementById('app');
+function renderApp(){try{_renderAppInner()}catch(e){console.error('Render error:',e);document.getElementById('app').innerHTML='<div style="padding:40px;text-align:center"><h2 style="color:var(--danger);margin-bottom:12px">Erro ao renderizar</h2><p style="color:var(--textMuted);margin-bottom:16px">'+e.message+'</p><button class="btn btn-p" onclick="page=\'pacientes\';_renderAppInner()">Voltar</button> <button class="btn btn-o" onclick="triggerImport()">Restaurar backup</button></div>'}}
+function _renderAppInner(){var el=document.getElementById('app');
   var wm=document.getElementById('welcomeMsg');if(wm)wm.textContent=PROF.nome?'Olá, '+PROF.nome.split(' ')[0]:'';
-  if(page==='home')renderHome(el);
-  else if(page==='pacientes')renderPac(el);
-  else if(page==='agenda'){page='home';renderHome(el);}
+  if(page==='home'){page='prontuarios';} if(page==='pacientes')renderPac(el);
   else if(page==='prontuarios')renderProntuarios(el);
   else if(page==='financeiro')renderFin(el);
   else if(page==='documentos'){if(laudoState.step==='edit'){renderLaudoEditor();return}renderDocs(el);}
   else if(page==='perfil')renderPerfil(el);
   else if(page==='testes')renderTestes(el);
   else if(page==='guia')renderGuia(el);
+  else if(page==='ferramentas')renderFerramentas(el);
+  else if(page==='guia_clinico')renderGuiaClinico(el);
   else if(page==='config')renderConfig(el);
 }
 
@@ -891,9 +960,6 @@ function updUnit(i,v){mdSel[i].unit=v}
 function renderMedTags(){var el=document.getElementById('pMedTags');if(!el)return;el.innerHTML=mdSel.map(function(m,i){var u=m.unit||'mg';return'<span class="med-tag">'+m.name+' <input type="text" placeholder="dose" value="'+(m.dose||'')+'" style="width:50px;padding:2px 6px;font-size:11px;border:1px solid #ddd;border-radius:4px" onchange="updDose('+i+',this.value)"><select style="padding:2px;font-size:11px;border:1px solid #ddd;border-radius:4px" onchange="updUnit('+i+',this.value)"><option value="mg"'+(u==='mg'?' selected':'')+'>mg</option><option value="mcg"'+(u==='mcg'?' selected':'')+'>mcg</option><option value="g"'+(u==='g'?' selected':'')+'>g</option><option value="UI"'+(u==='UI'?' selected':'')+'>UI</option><option value="mL"'+(u==='mL'?' selected':'')+'>mL</option><option value="gotas"'+(u==='gotas'?' selected':'')+'>gotas</option></select><button onclick="rmMed('+i+')">x</button></span>'}).join('')}
 function medKey(e){var el=document.getElementById('pMedList');var items=el.querySelectorAll('.ac-item');if(!items.length)return;if(e.key==='ArrowDown'){e.preventDefault();mdIdx=Math.min(mdIdx+1,items.length-1);hlItems(items,mdIdx)}else if(e.key==='ArrowUp'){e.preventDefault();mdIdx=Math.max(mdIdx-1,0);hlItems(items,mdIdx)}else if(e.key==='Enter'&&mdIdx>=0){e.preventDefault();items[mdIdx].click()}}
 
-// === Calendar Sync (disabled) ===
-function calSync(){}
-function calSyncBatch(){}
 
 // === Sync Payments ===
 function syncPayments(){var changed=false;
@@ -937,86 +1003,6 @@ function syncPayments(){var changed=false;
   }
   if(changed)save()}
 
-// === HOME ===
-function renderHome(el){
-  var t=today();
-  var sH=D.sessoes.filter(function(s){return s.data===t}).sort(function(a,b){return a.hora.localeCompare(b.hora)});
-  var pAtivos=D.pacientes.filter(function(p){return p.ativo!==false}).length;
-  var mes=t.substring(0,7);
-  var pgMes=D.pagamentos.filter(function(p){return p.data&&p.data.substring(0,7)===mes});
-  var totalMes=pgMes.reduce(function(a,p){return a+p.valor},0);
-  var recebido=pgMes.filter(function(p){return p.status==='pago'}).reduce(function(a,p){return a+p.valor},0);
-  var pendente=pgMes.filter(function(p){return p.status==='pendente'}).reduce(function(a,p){return a+p.valor},0);
-  var mLabel=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  var mesNome=mLabel[parseInt(mes.split('-')[1])-1]+'/'+mes.split('-')[0];
-
-
-
-  var testesRecentes=(D.testes||[]).sort(function(a,b){return b.data.localeCompare(a.data)}).slice(0,3);
-
-
-  var html='';
-
-  // Hero banner
-  var greeting='Bom dia';var hh=new Date().getHours();if(hh>=12&&hh<18)greeting='Boa tarde';if(hh>=18)greeting='Boa noite';
-  var profNome=D.config&&D.config.profNome?D.config.profNome:'';
-  html+='<div style="background:linear-gradient(135deg,#133D2E 0%,#1B6B50 50%,#1F7A5C 100%);border-radius:16px;padding:32px 28px;margin-bottom:28px;color:#fff;position:relative;overflow:hidden">';
-  html+='<div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.04)"></div>';
-  html+='<div style="position:absolute;bottom:-60px;right:60px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.03)"></div>';
-  html+='<div style="position:relative;z-index:1">';
-  html+='<div style="font-size:14px;opacity:.7;font-weight:500;margin-bottom:4px">'+fmtD(t)+'</div>';
-  html+='<h2 style="font-size:26px;font-weight:700;letter-spacing:-.03em;margin-bottom:24px">'+greeting+(profNome?', '+profNome.split(' ')[0]:'')+'</h2>';
-  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 24px">';
-  html+='<div style="cursor:pointer" onclick="go(\'pacientes\')"><div style="font-size:11px;opacity:.6;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Pacientes</div><div style="font-size:24px;font-weight:700;margin-top:6px;letter-spacing:-.02em">'+pAtivos+'</div></div>';
-  html+='<div style="cursor:pointer" onclick="go(\'agenda\')"><div style="font-size:11px;opacity:.6;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Hoje</div><div style="font-size:24px;font-weight:700;margin-top:6px;letter-spacing:-.02em">'+sH.length+'<span style="font-size:13px;font-weight:500;opacity:.7;margin-left:4px">'+(sH.length===1?'sessão':'sessões')+'</span></div></div>';
-  html+='<div style="cursor:pointer" onclick="go(\'financeiro\')"><div style="font-size:11px;opacity:.6;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Recebido</div><div style="font-size:24px;font-weight:700;margin-top:6px;letter-spacing:-.02em">'+fmt$(recebido)+'</div></div>';
-  html+='<div style="cursor:pointer" onclick="go(\'financeiro\')"><div style="font-size:11px;opacity:.6;font-weight:600;text-transform:uppercase;letter-spacing:.06em">Pendente</div><div style="font-size:24px;font-weight:700;margin-top:6px;letter-spacing:-.02em;color:#FCA5A5">'+fmt$(pendente)+'</div></div>';
-  html+='</div></div></div>';
-
-  // Confirmations
-  html+=renderConfirmacoes();
-
-  // Two-column grid
-  html+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:24px">';
-
-  // Sessões Hoje
-  html+='<div class="card" style="padding:28px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px"><h3 style="font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.01em">Sessões de hoje</h3><button class="btn btn-o btn-s" onclick="go(\'financeiro\')" style="font-size:12px">Ver financeiro</button></div>';
-  if(!sH.length){
-    html+='<p style="color:var(--textLight);padding:24px 0;text-align:center;font-size:13px">Sem sessões agendadas.</p>';
-  }else{
-    sH.forEach(function(s){
-      var payStatus=getSessPayStatus(s.id,s.pacienteId,s.data);
-      html+='<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid rgba(0,0,0,.04);cursor:pointer" onclick="openPerfil(\''+s.pacienteId+'\')"><div style="font-size:14px;font-weight:600;color:var(--primary);min-width:50px">'+s.hora+'</div><div style="flex:1"><div style="font-weight:500;font-size:14px">'+getNome(s.pacienteId)+'</div></div><span class="'+payStatus.cls+'" style="font-size:13px">'+payStatus.icon+'</span></div>';
-    });
-  }
-  html+='</div>';
-
-  // Financeiro
-  html+='<div class="card" style="padding:28px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px"><h3 style="font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.01em">Financeiro — '+mesNome+'</h3><button class="btn btn-o btn-s" onclick="go(\'financeiro\')" style="font-size:12px">Detalhes</button></div>';
-  var pct=totalMes>0?Math.round(recebido/totalMes*100):0;
-  html+='<div style="margin-bottom:24px"><div style="display:flex;justify-content:space-between;font-size:12px;color:var(--textMuted);margin-bottom:8px"><span>Recebido</span><span style="font-weight:600">'+pct+'%</span></div><div style="background:rgba(0,0,0,.06);border-radius:6px;height:6px;overflow:hidden"><div style="background:var(--primary);height:100%;border-radius:6px;width:'+pct+'%;transition:width .5s"></div></div></div>';
-  html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;text-align:center">';
-  html+='<div><div style="font-size:11px;color:var(--textLight);text-transform:uppercase;letter-spacing:.04em;font-weight:600">Total</div><div style="font-size:20px;font-weight:700;margin-top:6px;letter-spacing:-.02em">'+fmt$(totalMes)+'</div></div>';
-  html+='<div><div style="font-size:11px;color:var(--textLight);text-transform:uppercase;letter-spacing:.04em;font-weight:600">Recebido</div><div style="font-size:20px;font-weight:700;margin-top:6px;color:var(--success);letter-spacing:-.02em">'+fmt$(recebido)+'</div></div>';
-  html+='<div><div style="font-size:11px;color:var(--textLight);text-transform:uppercase;letter-spacing:.04em;font-weight:600">Pendente</div><div style="font-size:20px;font-weight:700;margin-top:6px;color:var(--danger);letter-spacing:-.02em">'+fmt$(pendente)+'</div></div>';
-  html+='</div></div>';
-
-  html+='</div>'; // close grid
-
-  // Testes recentes
-  if(testesRecentes.length){
-    html+='<div class="card" style="padding:28px;margin-top:24px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px"><h3 style="font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.01em">Testes recentes</h3><button class="btn btn-o btn-s" onclick="go(\'testes\')" style="font-size:12px">Ver todos</button></div>';
-    testesRecentes.forEach(function(tt){
-      html+='<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(0,0,0,.04)"><div style="width:8px;height:8px;border-radius:50%;background:'+(tt.cor||'var(--textMuted)')+';flex-shrink:0"></div><div style="flex:1"><div style="font-weight:500;font-size:13px">'+getNome(tt.pacienteId)+' — '+tt.testeNome+'</div><div style="font-size:12px;color:var(--textLight);margin-top:2px">'+fmtD(tt.data)+' · '+tt.nivel+' ('+tt.score+')</div></div></div>';
-    });
-    html+='</div>';
-  }
-
-  // LGPD compact
-  html+='<div style="margin-top:28px;padding:14px 18px;border-radius:var(--radiusSm);font-size:11px;color:var(--textLight);line-height:1.6;background:rgba(0,0,0,.02)">Dados armazenados localmente (LGPD, Art. 46). Nenhuma informação é transmitida a servidores externos.</div>';
-
-  el.innerHTML=html;
-}
 function getSessPayStatus(sessId,pacId,data){
   var pac=D.pacientes.find(function(p){return p.id===pacId});
   if(!pac||!pac.valor)return{icon:'',cls:'',title:''};
@@ -1030,17 +1016,17 @@ function getSessPayStatus(sessId,pacId,data){
 
 // === PACIENTES (lista A-Z) ===
 function renderPac(el){
-  var list=D.pacientes.filter(function(p){if(p.ativo===false)return false;if(!pacS)return true;return norm(p.nome+' '+(p.cpf||'')+' '+(p.telefone||'')+' '+(p.cids||[]).map(function(c){return c.code+' '+c.name}).join(' ')).includes(norm(pacS))});
+  var list=D.pacientes.filter(function(p){if(!window._showInativos&&p.ativo===false)return false;if(!pacS)return true;return norm(p.nome+' '+(p.cpf||'')+' '+(p.telefone||'')+' '+(p.cids||[]).map(function(c){return c.code+' '+c.name}).join(' ')).includes(norm(pacS))});
   list.sort(function(a,b){return(a.nome||'').localeCompare(b.nome||'','pt-BR')});
+  var inCount=D.pacientes.filter(function(p){return p.ativo===false}).length;
   el.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px"><h2 style="font-family:var(--fontD);font-size:28px;font-style:italic">Pacientes <span style="font-size:15px;font-weight:400;color:var(--textMuted)">('+list.length+')</span></h2><button class="btn btn-p" onclick="openPacForm()">+ Novo</button></div>'+
-  '<div class="filter-bar" style="gap:8px"><input type="text" placeholder="Buscar por nome, CPF, telefone, CID..." value="'+pacS+'" oninput="pacS=this.value;renderApp()" style="flex:1;min-width:200px"></div>'+
+  '<div style="display:flex;gap:8px;margin-bottom:12px;align-items:center"><input type="text" placeholder="Buscar por nome, CPF, telefone, CID..." value="'+pacS+'" oninput="pacS=this.value;renderApp()" style="flex:1;min-width:200px">'+(inCount?'<button class="btn btn-s '+(window._showInativos?'btn-p':'btn-o')+'" onclick="window._showInativos=!window._showInativos;renderApp()">Inativos ('+inCount+')</button>':'')+'</div>'+
   (list.length===0?'<div class="empty">'+(pacS?'Nenhum resultado.':'Nenhum paciente cadastrado.')+'</div>':'<div class="card">'+list.map(function(p){
     var cidsStr=(p.cids||[]).map(function(c){return c.name}).join(', ');
     var medsStr=(p.meds||[]).map(function(m){return m.name+(m.dose?' '+m.dose+(m.unit||''):'')}).join(', ');
-    var proxSess=D.sessoes.filter(function(s){return s.pacienteId===p.id&&s.data>=today()}).sort(function(a,b){return a.data.localeCompare(b.data)})[0];
-    var sessColor='#4361EE';var sessBg='transparent';var sessLabel='';
-    if(proxSess){var td=today();var tmr=function(){var d=new Date();d.setDate(d.getDate()+1);return d.toISOString().split('T')[0]}();if(proxSess.data===td){sessColor='var(--primary)';sessBg='var(--primaryFaded)';sessLabel=' · Hoje'}else if(proxSess.data===tmr){sessColor='#b45309';sessBg='rgba(251,191,36,.1)';sessLabel=' · Amanhã'}}
-    return'<div style="padding:16px 20px;display:flex;align-items:center;gap:16px;border-bottom:1px solid rgba(0,0,0,.04);cursor:pointer" onclick="openPerfil(\''+p.id+'\')"><div class="avatar">'+p.nome.charAt(0).toUpperCase()+'</div><div style="flex:1;min-width:0"><div style="font-weight:600">'+p.nome+'</div><div style="font-size:12px;color:var(--textMuted)">'+(p.telefone||'')+(cidsStr?' · '+cidsStr:'')+'</div>'+(medsStr?'<div style="font-size:11px;color:var(--accent);margin-top:2px">'+medsStr+'</div>':'')+(proxSess?'<div style="font-size:11px;font-weight:600;color:'+sessColor+';margin-top:2px;padding:2px 6px;border-radius:4px;background:'+sessBg+';display:inline-block">'+fmtD(proxSess.data)+' '+proxSess.hora+sessLabel+'</div>':'')+'</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span class="badge '+(p.modalidade==='pacote'?'bg-green':'bg-yellow')+'">'+(p.modalidade==='pacote'?'Pacote':'Sessão')+'</span>'+(p.valor?'<div style="font-size:12px;font-weight:600">'+fmt$(p.valor)+'</div>':'')+'</div></div>'}).join('')+'</div>');
+    var inactiveStyle=p.ativo===false?'opacity:.5;':'';
+    var toggleBtn='<button class="btn btn-g" onclick="event.stopPropagation();toggleAtivo(\''+p.id+'\')" title="'+(p.ativo===false?'Reativar':'Inativar')+'" style="font-size:11px;padding:4px 8px;flex-shrink:0;color:'+(p.ativo===false?'#16a34a':'var(--textLight)')+'">'+(p.ativo===false?'⟲':'⏸')+'</button>';
+    return'<div style="padding:16px 20px;display:flex;align-items:center;gap:16px;border-bottom:1px solid rgba(0,0,0,.04);cursor:pointer;'+inactiveStyle+'" onclick="openPerfil(\''+p.id+'\')"><div class="avatar" style="'+(p.ativo===false?'background:var(--textLight);':'')+'">'+p.nome.charAt(0).toUpperCase()+'</div><div style="flex:1;min-width:0"><div style="font-weight:600">'+p.nome+(p.ativo===false?' <span style="font-size:10px;color:var(--textLight);font-weight:400">inativo</span>':'')+'</div><div style="font-size:12px;color:var(--textMuted)">'+(p.telefone||'')+(cidsStr?' · '+cidsStr:'')+'</div>'+(medsStr?'<div style="font-size:11px;color:var(--accent);margin-top:2px">'+medsStr+'</div>':'')+'</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span class="badge '+(p.modalidade==='pacote'?'bg-green':'bg-yellow')+'">'+(p.modalidade==='pacote'?'Pacote':'Sessão')+'</span>'+(p.valor?'<div style="font-size:12px;font-weight:600">'+fmt$(p.valor)+'</div>':'')+'</div>'+toggleBtn+'<button class="btn btn-g" onclick="event.stopPropagation();quickAddSession(\''+p.id+'\')" title="Registrar sessão" style="font-size:16px;padding:6px;flex-shrink:0">+</button></div>'}).join('')+'</div>');
 }
 
 // === PACIENTE FORM (sem agendamento) ===
@@ -1062,7 +1048,7 @@ function openPacForm(id){
   '<div class="field"><label>Valor (R$)</label><input type="number" id="pValor" value="'+(p.valor||'')+'"></div>'+
   '<div class="field" id="pQtdWrap" style="display:'+(isP?'block':'none')+'"><label>Qtd sessões pacote</label><input type="number" id="pQtd" value="'+(p.qtdPacote||'')+'">' +
   '</div></div>'+
-  '<div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end">'+(id?'<button class="btn btn-d btn-s" onclick="delPac()">Excluir Paciente</button>':'')+'<button class="btn btn-p" onclick="savePac()">Salvar</button></div>');
+  '<div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end">'+(id?'<button class="btn btn-o btn-s" onclick="toggleAtivoPac()">'+(p.ativo===false?'Reativar':'Inativar')+'</button><button class="btn btn-d btn-s" onclick="delPac()">Excluir</button>':'')+'<button class="btn btn-p" onclick="savePac()">Salvar</button></div>');
   setTimeout(function(){renderCidTags();renderMedTags()},50);
 }
 function toggleValor(){document.getElementById('pQtdWrap').style.display=document.getElementById('pMod').value==='pacote'?'block':'none'}
@@ -1127,18 +1113,16 @@ function renderPerfil(el){
   (medsStr?'<div style="margin-bottom:6px">'+medsStr+'</div>':'')+
   '</div>';
 
-  var tabs='<div class="ptabs"><div class="ptab'+(profTab==='evolucao'?' active':'')+'" onclick="profTab=\'evolucao\';renderApp()">Evolução</div><div class="ptab'+(profTab==='financeiro'?' active':'')+'" onclick="profTab=\'financeiro\';renderApp()">Financeiro</div><div class="ptab'+(profTab==='docs'?' active':'')+'" onclick="profTab=\'docs\';renderApp()">Documentos</div><div class="ptab'+(profTab==='farma'?' active':'')+'" onclick="profTab=\'farma\';renderApp()">Farmacologia</div><div class="ptab'+(profTab==='testes'?' active':'')+'" onclick="profTab=\'testes\';renderApp()">Testes</div></div>';
+  var tabs='<div class="ptabs"><div class="ptab'+(profTab==='evolucao'?' active':'')+'" onclick="profTab=\'evolucao\';renderApp()">Evolução</div><div class="ptab'+(profTab==='ia'?' active':'')+'" onclick="profTab=\'ia\';renderApp()">IA Clínica</div><div class="ptab'+(profTab==='plano'?' active':'')+'" onclick="profTab=\'plano\';renderApp()">Plano</div><div class="ptab'+(profTab==='financeiro'?' active':'')+'" onclick="profTab=\'financeiro\';renderApp()">Financeiro</div><div class="ptab'+(profTab==='docs'?' active':'')+'" onclick="profTab=\'docs\';renderApp()">Documentos</div><div class="ptab'+(profTab==='farma'?' active':'')+'" onclick="profTab=\'farma\';renderApp()">Farmacologia</div><div class="ptab'+(profTab==='testes'?' active':'')+'" onclick="profTab=\'testes\';renderApp()">Testes</div></div>';
 
   // === PATIENT SNAPSHOT ===
   var snapshot='';
   var pastSessoes=D.sessoes.filter(function(s){return s.pacienteId===profPacId&&s.data<=today()}).sort(function(a,b){return b.data.localeCompare(a.data)});
   var lastSess=pastSessoes.length>0?pastSessoes[0]:null;
-  var nextSess=D.sessoes.filter(function(s){return s.pacienteId===profPacId&&s.data>today()}).sort(function(a,b){return a.data.localeCompare(b.data)})[0]||null;
   var lastEvo=lastSess&&lastSess.obs?lastSess.obs:'';
   if(lastEvo.length>180)lastEvo=lastEvo.substring(0,180)+'\u2026';
   snapshot='<div class="snapshot-card"><div class="snapshot-title">Resumo r\u00e1pido</div><div class="snapshot-grid">';
   snapshot+='<div class="snapshot-item"><div class="snapshot-label">\u00daltima sess\u00e3o</div><div class="snapshot-val">'+(lastSess?fmtD(lastSess.data)+' \u00b7 '+lastSess.hora:'\u2014')+'</div></div>';
-  snapshot+='<div class="snapshot-item"><div class="snapshot-label">Pr\u00f3xima sess\u00e3o</div><div class="snapshot-val">'+(nextSess?fmtD(nextSess.data)+' \u00b7 '+nextSess.hora:'Nenhuma agendada')+'</div></div>';
   snapshot+='</div>';
   if(p.queixas){snapshot+='<div class="snapshot-section"><div class="snapshot-label">Queixa principal</div><div class="snapshot-val">'+p.queixas+'</div></div>';}
   if(lastEvo){snapshot+='<div class="snapshot-section"><div class="snapshot-label">\u00daltima evolu\u00e7\u00e3o</div><div class="snapshot-val snapshot-evo">'+lastEvo+'</div></div>';}
@@ -1159,9 +1143,11 @@ function renderPerfil(el){
       moodData.forEach(function(n){var pct=Math.round((n.humor/10)*100);var clr=n.humor<=3?'#ef4444':n.humor<=5?'#f59e0b':n.humor<=7?'#22c55e':'#16a34a';moodChart+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px"><div style="width:100%;background:'+clr+';border-radius:4px 4px 0 0;height:'+pct+'%;min-height:4px"></div><div style="font-size:9px;color:var(--textMuted)">'+n.humor+'</div></div>'});
       moodChart+='</div><div style="display:flex;justify-content:space-between;font-size:9px;color:var(--textMuted);margin-top:4px"><span>'+fmtD(moodData[0].data)+'</span><span>'+fmtD(moodData[moodData.length-1].data)+'</span></div></div>';
     }
-    // Also show session-linked notes (from old sessoes.obs)
+    // Mood trend alert (#13)
+    content+=getMoodAlert(profPacId);
+  // Also show session-linked notes (from old sessoes.obs)
     var sessNotas=D.sessoes.filter(function(s){return s.pacienteId===profPacId&&s.data<=today()&&s.obs}).sort(function(a,b){return b.data.localeCompare(a.data)});
-    content='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="font-size:16px;font-weight:600">Evolução <span style="font-weight:400;color:var(--textMuted);font-size:13px">('+totalNotas+' notas'+(sessNotas.length?' + '+sessNotas.length+' sessões':'')+')</span></h3><button class="btn btn-p btn-s" onclick="addEvolucaoV5()">+ Registrar Sessão</button></div>';
+    content='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px"><h3 style="font-size:16px;font-weight:600">Evolução <span style="font-weight:400;color:var(--textMuted);font-size:13px">('+totalNotas+' notas)</span></h3><div style="display:flex;gap:6px"><button class="btn btn-o btn-s" onclick="exportEvolPDF(\''+profPacId+'\')">PDF</button><label class="btn btn-o btn-s" style="cursor:pointer"><input type="file" accept=".pdf,.docx,.doc,.txt,.srt,.vtt,.md" multiple style="display:none" onchange="bulkUploadTranscripts(this,\''+profPacId+'\')">📎 Upload</label><button class="btn btn-p btn-s" onclick="addEvolucaoV5()">+ Sessão</button></div></div>';
     content+='<input type="text" placeholder="Buscar nas notas..." value="'+evoSearch+'" oninput="window._evoSearch=this.value;renderApp()" style="width:100%;margin-bottom:16px;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px">';
     content+=moodChart;
     if(notas.length===0&&sessNotas.length===0){content+='<div class="empty">'+(evoSearch?'Nenhum resultado.':'Nenhum registro de evolução. Registre uma sessão ou use o botão + acima.')+'</div>'}
@@ -1171,11 +1157,12 @@ function renderPerfil(el){
         var humorBadge=n.humor?'<span style="display:inline-block;background:'+(n.humor<=3?'#ef4444':n.humor<=5?'#f59e0b':'#22c55e')+';color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;margin-left:6px">Humor:'+n.humor+'</span>':'';
         var ansBadge=n.ansiedade?'<span style="display:inline-block;background:'+(n.ansiedade<=3?'#16a34a':n.ansiedade<=5?'#22c55e':n.ansiedade<=7?'#f59e0b':'#ef4444')+';color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;margin-left:4px">Ans:'+n.ansiedade+'</span>':'';
         var tagStr=n.tags&&n.tags.length?'<div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">'+n.tags.map(function(t){return'<span style="font-size:10px;padding:2px 8px;background:var(--primaryFaded);color:var(--primary);border-radius:10px;font-weight:600">'+t+'</span>'}).join('')+'</div>':'';
-        var transBtn=n.transcricao?'<div style="margin-top:6px"><button class="btn btn-o btn-s" style="font-size:11px" onclick="event.stopPropagation();viewTranscript(\''+n.id+'\')">📝 Transcrição ('+Math.round(n.transcricao.length/1000)+'KB)</button></div>':'';
+        var transBtn='';
         var preview='';
         if(n.soap){var parts=[];if(n.soap.s)parts.push('<strong>S:</strong> '+n.soap.s.substring(0,100));if(n.soap.a)parts.push('<strong>A:</strong> '+n.soap.a.substring(0,80));preview='<div style="font-size:13px;line-height:1.5;color:var(--text)">'+parts.join(' · ')+'</div>'}
         else if(n.texto){preview='<div style="font-size:13px;line-height:1.5;color:var(--text);white-space:pre-wrap">'+n.texto.substring(0,200)+(n.texto.length>200?'...':'')+'</div>'}
-        return'<div class="card" style="padding:16px;margin-bottom:10px;cursor:pointer" onclick="viewEvolNote(\''+n.id+'\')"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div><span style="font-size:12px;color:var(--textMuted)">#'+sessNum+' · </span><span class="badge bg-green">'+fmtD(n.data)+'</span> <span style="font-weight:600;font-size:13px">'+n.hora+'</span>'+humorBadge+ansBadge+'</div><div style="display:flex;gap:6px"><button class="btn btn-g btn-s" onclick="event.stopPropagation();editEvolNoteV5(\''+n.id+'\')">Editar</button><button class="btn btn-g btn-s" style="color:var(--danger)" onclick="event.stopPropagation();delEvolNote(\''+n.id+'\')">×</button></div></div>'+preview+tagStr+transBtn+'</div>'}).join('');
+        var aiBadge=n.analiseIA?'<span style="display:inline-block;background:var(--accentLight);color:var(--accent);font-size:10px;padding:1px 6px;border-radius:10px;margin-left:6px">IA ✓</span>':'<button class="btn btn-g" style="font-size:10px;padding:1px 6px;color:var(--accent)" onclick="event.stopPropagation();aiAnalyzeManual(\''+n.id+'\')">🧠 Analisar</button>';
+        return'<div class="card" style="padding:16px;margin-bottom:10px;cursor:pointer" onclick="viewEvolNote(\''+n.id+'\')"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div><span style="font-size:12px;color:var(--textMuted)">#'+sessNum+' · </span><span class="badge bg-green">'+fmtD(n.data)+'</span> <span style="font-weight:600;font-size:13px">'+n.hora+'</span>'+humorBadge+ansBadge+aiBadge+'</div><div style="display:flex;gap:6px"><button class="btn btn-g btn-s" onclick="event.stopPropagation();editEvolNoteV5(\''+n.id+'\')">Editar</button><button class="btn btn-g btn-s" style="color:var(--danger)" onclick="event.stopPropagation();delEvolNote(\''+n.id+'\')">×</button></div></div>'+preview+tagStr+transBtn+'</div>'}).join('');
       // Show old session notes below if any
       if(sessNotas.length&&!evoSearch){
         content+='<div style="margin-top:24px;padding-top:16px;border-top:2px solid var(--border)"><h4 style="font-size:14px;color:var(--textMuted);margin-bottom:12px">Notas de sessões anteriores</h4>';
@@ -1186,7 +1173,7 @@ function renderPerfil(el){
   else if(profTab==='sessoes'){
     var futuras=D.sessoes.filter(function(s){return s.pacienteId===profPacId&&s.data>=today()}).sort(function(a,b){return a.data.localeCompare(b.data)});
     var passadas=D.sessoes.filter(function(s){return s.pacienteId===profPacId&&s.data<today()}).sort(function(a,b){return b.data.localeCompare(a.data)});
-    content='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><h3 style="font-size:16px;font-weight:600">Sessões Futuras ('+futuras.length+')</h3><button class="btn btn-p btn-s" onclick="openAgendarPerfil()">+ Agendar</button></div>';
+    content='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px"><h3 style="font-size:16px;font-weight:600">Sessões Futuras ('+futuras.length+')</h3><div style="display:flex;gap:6px"><button class="btn btn-o btn-s" onclick="openRecorrencia(\''+profPacId+'\')">Recorrência</button><button class="btn btn-p btn-s" onclick="openAgendarPerfil()">+ Agendar</button></div></div>';
     content+=(futuras.length===0?'<p style="color:var(--textMuted);margin-bottom:20px">Nenhuma sessão futura.</p>':'<div class="card" style="margin-bottom:20px">'+futuras.map(function(s){var ps=getSessPayStatus(s.id,s.pacienteId,s.data);return'<div style="padding:10px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)"><span class="badge bg-green">'+fmtD(s.data)+'</span><span style="font-weight:600">'+s.hora+'</span><span>'+ps.icon+'</span><div style="flex:1"></div><button class="btn btn-g btn-s" onclick="editSess(\''+s.id+'\')">Editar</button><button class="btn btn-g btn-s" onclick="delSess(\''+s.id+'\')">Excluir</button></div>'}).join('')+'</div>');
     content+='<h3 style="font-size:16px;font-weight:600;margin-bottom:12px">Sessões Realizadas ('+passadas.length+')</h3>';
     content+=(passadas.length===0?'<p style="color:var(--textMuted)">Nenhuma sessão realizada.</p>':'<div class="card">'+passadas.slice(0,20).map(function(s){return'<div style="padding:8px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);font-size:13px"><span>'+fmtD(s.data)+'</span><span style="font-weight:600">'+s.hora+'</span><div style="flex:1;color:var(--textMuted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(s.obs||'—')+'</div></div>'}).join('')+'</div>');
@@ -1204,6 +1191,12 @@ function renderPerfil(el){
     content+=(docs.length===0?'<div class="empty">Nenhum documento emitido.</div>':'<div class="card">'+docs.map(function(d){return'<div style="padding:12px 16px;border-bottom:1px solid var(--border)"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:600;font-size:13px">'+d.titulo+'</div><div style="font-size:11px;color:var(--textMuted)">'+fmtDT(d.createdAt)+'</div></div><div style="display:flex;gap:6px"><button class="btn btn-o btn-s" onclick="viewDoc(\''+d.id+'\')">Ver</button><button class="btn btn-o btn-s" onclick="rePrintDoc(\''+d.id+'\')">Impr.</button></div></div></div>'}).join('')+'</div>');
   }
 
+  if(profTab==='ia'){
+    content=renderIAClinica(p);
+  }
+  if(profTab==='plano'){
+    content=renderPlanoTab(p);
+  }
   if(profTab==='farma'){
     content=renderFarmaTab(p);
   }
@@ -1237,16 +1230,91 @@ function evoFormHTML(n){
   '<div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--textSecondary);margin-bottom:6px;display:block">Formato</label><div style="display:flex;gap:8px;margin-bottom:10px"><button class="btn '+(isSOAP?'btn-p':'btn-o')+' btn-s" onclick="toggleEvoFmt(true)">SOAP</button><button class="btn '+(!isSOAP?'btn-p':'btn-o')+' btn-s" onclick="toggleEvoFmt(false)">Livre</button></div></div>'+
   '<div id="evoFmtArea">'+(isSOAP?evoSOAP(soap):evoFree(n.texto||''))+'</div>'+
   '<div style="margin-bottom:14px"><label style="font-size:12px;font-weight:600;color:var(--textSecondary);margin-bottom:8px;display:block">Intervenções</label><div id="evoTagArea" style="display:flex;flex-wrap:wrap;gap:6px">'+EVOL_TAGS.map(function(t){var sel=evoTagSel.indexOf(t)>=0;return'<button class="btn btn-s '+(sel?'btn-p':'btn-o')+'" style="font-size:11px;padding:4px 10px" onclick="toggleEvoTag(this,\''+t.replace(/'/g,"\\'")+'\')">'+t+'</button>'}).join('')+'</div></div>'+
-  '<div style="margin-bottom:14px;padding:16px;border:1.5px dashed var(--border);border-radius:var(--radius);background:var(--surfaceAlt)"><label style="font-size:12px;font-weight:600;color:var(--textSecondary);margin-bottom:8px;display:block">Transcrição <span style="font-weight:400">(opcional)</span></label>'+(n.transcricao?'<div style="margin-bottom:8px"><span style="color:var(--primary);font-weight:600;font-size:13px">✓ Transcrição ('+Math.round(n.transcricao.length/1000)+'KB)</span> <button class="btn btn-g btn-s" onclick="window._evoTranscricao=null;this.parentElement.innerHTML=\'Removida\'">Remover</button></div>':'')+'<div style="display:flex;gap:8px"><input type="file" id="evoTransFile" accept=".pdf,.docx,.doc,.txt,.srt,.vtt,.md" style="font-size:12px;flex:1" onchange="loadTransFile(this)"><button class="btn btn-o btn-s" onclick="pasteTranscript()">Colar</button></div></div>'+
   '<div style="text-align:right;margin-top:16px"><button class="btn btn-p" onclick="saveEvolV5(\''+( n.id||'')+'\')">Salvar</button></div>';
 }
 function evoSOAP(s){s=s||{};return'<div class="field"><label>S — Subjetivo</label><textarea id="evoS" style="min-height:80px" placeholder="Relato do paciente...">'+(s.s||'')+'</textarea></div><div class="field"><label>O — Objetivo</label><textarea id="evoO" style="min-height:60px" placeholder="Observações clínicas...">'+(s.o||'')+'</textarea></div><div class="field"><label>A — Avaliação</label><textarea id="evoA" style="min-height:60px" placeholder="Análise clínica...">'+(s.a||'')+'</textarea></div><div class="field"><label>P — Plano</label><textarea id="evoP" style="min-height:60px" placeholder="Próximos passos...">'+(s.p||'')+'</textarea></div>'}
 function evoFree(t){return'<div class="field"><label>Anotações clínicas</label><textarea id="evoTexto" style="min-height:200px" placeholder="Evolução do paciente...">'+t+'</textarea></div>'}
 function toggleEvoFmt(soap){var a=document.getElementById('evoFmtArea');if(soap){var t=document.getElementById('evoTexto')?document.getElementById('evoTexto').value:'';a.innerHTML=evoSOAP({s:t})}else{var p=[];['evoS','evoO','evoA','evoP'].forEach(function(id){var el=document.getElementById(id);if(el&&el.value)p.push(el.value)});a.innerHTML=evoFree(p.join('\n\n'))}}
 function toggleEvoTag(btn,tag){var i=evoTagSel.indexOf(tag);if(i>=0){evoTagSel.splice(i,1);btn.className='btn btn-s btn-o'}else{evoTagSel.push(tag);btn.className='btn btn-s btn-p'}btn.style.fontSize='11px';btn.style.padding='4px 10px'}
-function loadTransFile(input){var f=input.files[0];if(!f)return;var r=new FileReader();r.onload=function(e){window._evoTranscricao=e.target.result;toast('Transcrição carregada: '+f.name)};r.readAsText(f)}
+async function loadTransFile(input){
+  var f=input.files[0];if(!f)return;
+  if(f.name.toLowerCase().endsWith('.pdf')){
+    toast('Extraindo texto do PDF...');
+    try{
+      var buf=await f.arrayBuffer();
+      if(typeof pdfjsLib==='undefined'){toast('PDF.js não carregou. Cole o texto manualmente.');return}
+      pdfjsLib.GlobalWorkerOptions.workerSrc='';
+      var pdf=await pdfjsLib.getDocument({data:buf,disableAutoFetch:true,disableStream:true}).promise;
+      var text='';
+      for(var i=1;i<=pdf.numPages;i++){
+        var page=await pdf.getPage(i);
+        var tc=await page.getTextContent();
+        var pageText=tc.items.map(function(it){return it.str}).join(' ');
+        text+=pageText+'\n';
+      }
+      text=text.trim();
+      if(text.length<50){toast('PDF sem texto extraível. Cole manualmente.');return}
+      window._evoTranscricao=text;
+      toast('Transcrição extraída: '+Math.round(text.length/1000)+'KB de '+pdf.numPages+' páginas');
+    }catch(e){toast('Erro PDF: '+e.message);console.error(e)}
+  }else{
+    var r=new FileReader();r.onload=function(e){window._evoTranscricao=e.target.result;toast('Transcrição carregada: '+f.name)};r.readAsText(f)
+  }
+}
 function pasteTranscript(){showModal('<div class="modal-header"><h2>Colar Transcrição</h2><button class="close" onclick="hideModal()">&times;</button></div><div class="field"><label>Cole o texto</label><textarea id="pasteTA" style="min-height:300px;font-family:monospace;font-size:12px" placeholder="Cole aqui..."></textarea></div><div style="text-align:right"><button class="btn btn-p" onclick="window._evoTranscricao=document.getElementById(\'pasteTA\').value;hideModal();toast(\'Transcrição colada\')">Confirmar</button></div>')}
 function addEvolucaoV5(){if(!D.evolucoes)D.evolucoes=[];showModal(evoFormHTML({}))}
+async function bulkUploadTranscripts(input,pacId){
+  var files=input.files;if(!files||!files.length)return;
+  if(!D.evolucoes)D.evolucoes=[];
+  var count=files.length;
+  if(!confirm('Criar '+count+' sessão(ões) com os arquivos selecionados?'))return;
+  toast('Processando '+count+' arquivo(s)...');
+
+  var created=0;
+  for(var i=0;i<files.length;i++){
+    var f=files[i];
+    try{
+      var data=await new Promise(function(resolve,reject){
+        var r=new FileReader();
+        r.onload=function(e){resolve(e.target.result)};
+        r.onerror=function(){reject(new Error('Erro leitura'))};
+        if(f.name.match(/\.(txt|srt|vtt|md)$/i)){r.readAsText(f)}
+        else{r.readAsDataURL(f)}
+      });
+
+      // Try to extract date from filename (Fireflies format: ...2026-03-17-17-04-03.docx)
+      var dateMatch=f.name.match(/(\d{4})-(\d{2})-(\d{2})/);
+      var timeMatch=f.name.match(/(\d{4})-(\d{2})-(\d{2})-(\d{2})-(\d{2})/);
+      var sessDate=dateMatch?dateMatch[0]:today();
+      var sessHora=timeMatch?(timeMatch[4]+':'+timeMatch[5]):pad(new Date().getHours())+':'+pad(new Date().getMinutes());
+
+      var arquivo={name:f.name,size:f.size,type:f.type,data:data};
+
+      D.evolucoes.push({
+        id:uid(),
+        pacienteId:pacId,
+        data:sessDate,
+        hora:sessHora,
+        humor:0,ansiedade:0,
+        soap:null,
+        texto:'Transcrição importada: '+f.name,
+        tags:[],
+        transcricao:null,
+        arquivos:[arquivo]
+      });
+      created++;
+    }catch(e){
+      console.error('Erro processando '+f.name+':',e);
+      toast('Erro em '+f.name);
+    }
+  }
+
+  if(created>0){
+    save();renderApp();
+    toast(created+' sessão(ões) criada(s) com transcrições');
+  }
+  input.value='';// reset file input
+}
 function editEvolNoteV5(nid){var n=(D.evolucoes||[]).find(function(x){return x.id===nid});if(!n)return;showModal(evoFormHTML(n))}
 function saveEvolV5(existingId){
   if(!D.evolucoes)D.evolucoes=[];
@@ -1271,7 +1339,6 @@ function viewEvolNote(nid){
   else if(n.texto){body='<div style="font-size:14px;line-height:1.7;white-space:pre-wrap">'+n.texto+'</div>'}
   var tags=n.tags&&n.tags.length?'<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border)"><div style="font-size:11px;font-weight:600;color:var(--textMuted);margin-bottom:8px">INTERVENÇÕES</div><div style="display:flex;flex-wrap:wrap;gap:6px">'+n.tags.map(function(t){return'<span style="font-size:11px;padding:3px 10px;background:var(--primaryFaded);color:var(--primary);border-radius:10px;font-weight:600">'+t+'</span>'}).join('')+'</div></div>':'';
   var trans='';
-  if(n.transcricao){trans='<div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:11px;font-weight:600;color:var(--textMuted)">TRANSCRIÇÃO ('+Math.round(n.transcricao.length/1000)+'KB)</span><div style="display:flex;gap:6px"><button class="btn btn-o btn-s" style="font-size:11px" onclick="copyTranscript(\''+n.id+'\')">Copiar</button><button class="btn btn-o btn-s" style="font-size:11px" onclick="dlTranscript(\''+n.id+'\')">Baixar</button></div></div><div style="max-height:200px;overflow:auto;padding:12px;background:var(--surfaceAlt);border-radius:var(--radiusSm);font-size:12px;line-height:1.7;white-space:pre-wrap;font-family:monospace">'+n.transcricao.substring(0,3000).replace(/</g,'&lt;')+'</div></div>'}
   showModal('<div class="modal-header"><h2>Sessão #'+sessNum+' — '+fmtD(n.data)+' '+n.hora+'</h2><button class="close" onclick="hideModal()">&times;</button></div><div style="margin-bottom:12px">'+hB+aB+'</div>'+body+tags+trans+'<div style="text-align:right;margin-top:20px"><button class="btn btn-o" onclick="editEvolNoteV5(\''+n.id+'\')">Editar</button></div>');
 }
 function viewTranscript(nid){viewEvolNote(nid)}
@@ -1382,24 +1449,6 @@ function delSessApply(id,scope){
 }
 
 // === AGENDA ===
-function renderAgenda(el){
-  var mNames=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  var first=new Date(calY,calM,1),startDow=first.getDay(),days=new Date(calY,calM+1,0).getDate();
-  var selStr=calY+'-'+pad(calM+1)+'-'+pad(calD);
-  var cal='<div class="cal-grid">';
-  ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].forEach(function(d){cal+='<div class="cal-head">'+d+'</div>'});
-  for(var i=0;i<startDow;i++)cal+='<div></div>';
-  var tStr=today();
-  for(var d=1;d<=days;d++){var ds=calY+'-'+pad(calM+1)+'-'+pad(d);var cls='cal-day';if(ds===tStr)cls+=' today';if(ds===selStr)cls+=' sel';var hasSess=D.sessoes.some(function(s){return s.data===ds});if(hasSess)cls+=' has-sess';cal+='<div class="'+cls+'" onclick="calD='+d+';renderApp()">'+d+(hasSess?'<div class="cal-dot"></div>':'')+'</div>'}
-  cal+='</div>';
-  var sessDay=D.sessoes.filter(function(s){return s.data===selStr}).sort(function(a,b){return a.hora.localeCompare(b.hora)});
-  el.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px"><h2 style="font-family:var(--fontD);font-size:28px;font-style:italic">Agenda</h2><div style="display:flex;gap:8px">'+(window.Android&&Android.readCalendarEvents?'<button class="btn btn-o btn-s" onclick="calPull();renderApp()" title="Sincronizar">\u21bb</button>':'')+'<button class="btn btn-p" onclick="openSessForm()">+ Sessão</button></div></div>'+
-  '<div class="card" style="padding:20px;margin-bottom:20px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><button class="btn btn-g" onclick="calM--;if(calM<0){calM=11;calY--}renderApp()">◀</button><span style="font-family:var(--fontD);font-size:18px;font-weight:600">'+mNames[calM]+' '+calY+'</span><button class="btn btn-g" onclick="calM++;if(calM>11){calM=0;calY++}renderApp()">▶</button></div>'+cal+'</div>'+
-  '<h3 style="font-family:var(--fontD);font-size:18px;margin-bottom:12px">'+fmtD(selStr)+'</h3>'+
-  (sessDay.length===0?'<div class="empty">Nenhuma sessão neste dia.</div>':'<div class="card">'+sessDay.map(function(s){var ps=getSessPayStatus(s.id,s.pacienteId,s.data);return'<div style="padding:14px 18px;border-bottom:1px solid var(--border)"><div style="display:flex;align-items:center;gap:12px"><div class="time-badge">'+s.hora+'</div><div style="flex:1;cursor:pointer" onclick="openPerfil(\''+s.pacienteId+'\')"><div style="font-weight:600">'+getNome(s.pacienteId)+'</div>'+(s.obs?'<div style="font-size:12px;color:var(--textMuted)">'+s.obs+'</div>':'')+'</div><span title="'+ps.title+'">'+ps.icon+'</span></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px;padding-top:8px;border-top:1px dashed var(--border)"><button class="btn btn-o btn-s" onclick="editSess(\''+s.id+'\')">Editar</button><button class="btn btn-o btn-s" style="color:var(--danger);border-color:var(--dangerLight)" onclick="delSess(\''+s.id+'\')">Excluir</button></div></div>'}).join('')+'</div>');
-}
-
-// === PRONTUÁRIOS (Global Session Log) ===
 var pronFilter='';
 function renderProntuarios(el){
   if(!D.evolucoes)D.evolucoes=[];
@@ -1548,7 +1597,12 @@ function saveSessionGlobal(){
   });
   save();hideModal();
   window._evoArquivos=[];window._evoTranscricao=null;
+  var _lastEvoId=D.evolucoes[D.evolucoes.length-1].id;
   toast('Sessão registrada');renderApp();
+  // Auto-analyze if enabled and has transcription
+  if(CFG.autoAI&&(window._evoTranscricao||texto)){
+    setTimeout(function(){aiAnalyzeSession(_lastEvoId)},500);
+  }
 }
 function pronViewSession(nid){
   var n=(D.evolucoes||[]).find(function(x){return x.id===nid});if(!n)return;
@@ -1576,11 +1630,18 @@ function pronViewSession(nid){
     });
     files+='</div>';
   }
+  // AI Analysis section
+  var aiSection='';
+  if(n.analiseIA){
+    aiSection='<div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(0,0,0,.06)"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px"><div style="display:flex;gap:6px"><button class="btn btn-o btn-s" style="font-size:11px" onclick="copyAnalysis(\''+n.id+'\')">📋 Copiar</button><button class="btn btn-o btn-s" style="font-size:11px;color:var(--accent)" onclick="insertAnalysisToSession(\''+n.id+'\')">📝 Inserir na sessão</button><button class="btn btn-o btn-s" style="font-size:11px" onclick="aiAnalyzeManual(\''+n.id+'\')">Reanalisar</button></div></div><div style="font-size:12.5px;color:var(--text);background:var(--surfaceAlt);padding:16px 20px;border-radius:14px;max-height:400px;overflow-y:auto">'+formatAIHtml(n.analiseIA.texto)+'</div></div>';
+  }else{
+    aiSection='<div style="margin-top:16px;padding-top:14px;border-top:1px solid rgba(0,0,0,.06);text-align:center"><button class="btn btn-o" onclick="aiAnalyzeManual(\''+n.id+'\')">🧠 Gerar Análise IA</button></div>';
+  }
   showModal(
     '<div class="modal-header"><h2 style="font-size:18px">'+nome+' — Sessão #'+sessNum+'</h2><button class="close" onclick="hideModal()">&times;</button></div>'+
     '<div style="margin-bottom:14px;font-size:13px;color:var(--textMuted)">'+fmtD(n.data)+' às '+n.hora+'</div>'+
     '<div style="display:flex;gap:6px;margin-bottom:16px">'+hB+aB+'</div>'+
-    body+tags+trans+files+
+    body+tags+trans+files+aiSection+
     '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:14px;border-top:1px solid rgba(0,0,0,.06)">'+
     '<button class="btn btn-o" onclick="editEvolNoteV5(\''+n.id+'\')">Editar</button>'+
     '<button class="btn btn-o" style="color:var(--danger)" onclick="if(confirm(\'Excluir sessão?\')){D.evolucoes=D.evolucoes.filter(function(x){return x.id!==\''+n.id+'\'});save();hideModal();renderApp()}">Excluir</button>'+
@@ -1597,19 +1658,124 @@ function downloadAttachment(nid,fileIdx){
   link.download=a.name;link.click();
 }
 
+
+// === FERRAMENTAS (Tools Hub) ===
+function renderFerramentas(el){
+  el.innerHTML='<div style="margin-bottom:24px"><h2 style="font-family:var(--fontD);font-size:28px;font-style:italic">Ferramentas</h2><p style="font-size:13px;color:var(--textMuted);margin-top:4px">Recursos clínicos e administrativos</p></div>'+
+  '<div class="tools-grid">'+
+  '<div class="tool-card" onclick="go(\'documentos\')"><span class="tool-icon">📄</span><div class="tool-title">Documentos</div><div class="tool-desc">Laudos, atestados, encaminhamentos e declarações</div></div>'+
+  '<div class="tool-card" onclick="go(\'testes\')"><span class="tool-icon">📊</span><div class="tool-title">Testes</div><div class="tool-desc">PHQ-9, GAD-7, instrumentos de avaliação psicológica</div></div>'+
+  '<div class="tool-card" onclick="go(\'guia_clinico\')"><span class="tool-icon">🧠</span><div class="tool-title">Guia Clínico</div><div class="tool-desc">Diagnósticos CID-11 e guia farmacológico completo</div></div>'+
+  '<div class="tool-card" onclick="go(\'guia\')"><span class="tool-icon">💊</span><div class="tool-title">Farmacologia</div><div class="tool-desc">Dosagens, interações e perfil de efeitos colaterais</div></div>'+
+  '</div>';
+}
+
+// === GUIA CLÍNICO CID-11 ===
+var CID_GUIDE={
+"6A02":{nome:"Transtorno do Espectro do Autismo (TEA)",cat:"Neurodesenvolvimento",prevalencia:"~1-2% da população global; razão masculino:feminino ~3:1",criterios:"Déficits persistentes na comunicação e interação social + padrões restritos e repetitivos de comportamento. Início no período do desenvolvimento. Prejuízo funcional significativo.",comorbidades:"TDAH (30-50%), ansiedade (40-50%), depressão, epilepsia (20-30%), TOC, distúrbios do sono, deficiência intelectual",abordagens:"ABA (Análise do Comportamento Aplicada), TEACCH, intervenção precoce Denver, treinamento de habilidades sociais, TCC adaptada para ansiedade comórbida, integração sensorial, comunicação alternativa (PECS)",medicacoes:"Risperidona ou aripiprazol (irritabilidade), metilfenidato (TDAH comórbido), ISRS (ansiedade/TOC comórbidos), melatonina (insônia)",redflags:"Regressão de habilidades, autolesão grave, agressividade intensa, epilepsia não controlada → encaminhamento neurológico",instrumentos:"AQ-10, M-CHAT-R/F (triagem infantil), CARS-2, ADOS-2 (padrão-ouro)",diferencial:"Transtorno da comunicação social, mutismo seletivo, deficiência intelectual isolada, TDAH, transtorno de apego reativo"},
+"6A05":{nome:"TDAH",cat:"Neurodesenvolvimento",prevalencia:"~5-7% crianças, ~2.5-4% adultos; razão M:F ~2:1 (mais equilibrada em adultos)",criterios:"Padrão persistente de desatenção e/ou hiperatividade-impulsividade que interfere no funcionamento. Início antes dos 12 anos. Presente em 2+ ambientes.",comorbidades:"Ansiedade (25-50%), depressão (20-30%), TOD (40-60%), transtorno de conduta, transtornos de aprendizagem, uso de substâncias (adultos)",abordagens:"Psicoeducação (fundamental), TCC adaptada para TDAH, treinamento parental (crianças), coaching executivo, técnicas de organização e planejamento, mindfulness, terapia comportamental",medicacoes:"Metilfenidato (1ª linha), lisdexanfetamina, atomoxetina (não-estimulante), guanfacina, bupropiona (adultos, off-label)",redflags:"Uso recreativo de estimulantes, comorbidade com transtorno bipolar (pode desestabilizar humor), ideação suicida, abuso de substâncias",instrumentos:"ASRS v1.1 (adultos), SNAP-IV, Conners (crianças), escala WFIRS (funcionalidade)",diferencial:"Ansiedade, depressão, transtorno bipolar, trauma/TEPT, distúrbios do sono, uso de substâncias, transtorno de personalidade borderline"},
+"6A60":{nome:"Episódio Depressivo",cat:"Transtornos do Humor",prevalencia:"~4.4% da população global; razão M:F ~1:2. Pico 25-44 anos",criterios:"Humor deprimido ou perda de interesse/prazer + pelo menos 4 sintomas adicionais (alteração sono/apetite/peso, fadiga, agitação/retardo, culpa, concentração, ideação suicida) por ≥2 semanas.",comorbidades:"Ansiedade (60-70%), insônia, dor crônica, uso de substâncias, transtornos de personalidade",abordagens:"TCC (forte evidência), ativação comportamental (1ª linha), terapia interpessoal, ACT, mindfulness-based (MBCT para recorrência), psicoeducação, exercício físico como adjuvante",medicacoes:"ISRS (1ª linha: sertralina, escitalopram), IRSN (venlafaxina, duloxetina), bupropiona (fadiga/apatia), mirtazapina (insônia/inapetência)",redflags:"Ideação suicida com plano, sintomas psicóticos, catatonia, mania/hipomania prévia → reavaliar bipolar",instrumentos:"PHQ-9 (rastreio e monitoramento), BDI-II, HAM-D, escala de Columbia (risco suicida)",diferencial:"Distimia, bipolar II (depressão), luto, hipotireoidismo, anemia, transtorno de adaptação, uso de substâncias"},
+"6A70":{nome:"Transtorno Depressivo Recorrente",cat:"Transtornos do Humor",prevalencia:"~50-80% dos pacientes com depressão terão recorrência. Risco aumenta a cada episódio",criterios:"Dois ou mais episódios depressivos separados por pelo menos 2 meses de remissão parcial ou completa.",comorbidades:"Ansiedade generalizada, pânico, uso de substâncias, insônia crônica",abordagens:"TCC com foco em prevenção de recaída, MBCT (forte evidência para recorrência), ativação comportamental, psicoeducação sobre sinais de alerta precoces, plano de crise",medicacoes:"Manutenção com ISRS/IRSN por mínimo 1-2 anos após remissão. Após 3+ episódios: considerar manutenção indefinida. Lítio (augmentação)",redflags:"Intervalos cada vez menores entre episódios, resistência a tratamento, conversão para bipolar",instrumentos:"PHQ-9 seriado, BDI-II, monitoramento longitudinal de humor",diferencial:"Bipolar II, distimia com agudizações (depressão dupla), transtorno de personalidade"},
+"6A80":{nome:"Transtorno Bipolar Tipo I",cat:"Transtornos do Humor",prevalencia:"~1% da população; igual entre sexos. Início típico 15-25 anos",criterios:"Pelo menos 1 episódio maníaco (humor elevado/irritável + energia aumentada + ≥3 sintomas: grandiosidade, redução do sono, pressão de fala, fuga de ideias, distractibilidade, agitação, comportamentos de risco) por ≥1 semana ou qualquer duração se hospitalização.",comorbidades:"Ansiedade (50-60%), uso de substâncias (40-60%), TDAH, transtornos de personalidade",abordagens:"Psicoeducação (essencial), TCC adaptada para bipolar, terapia de ritmo social (IPSRT), planejamento de crise, monitoramento de humor, regulação de rotina sono/vigília",medicacoes:"Lítio (1ª linha, antisuicida), valproato, carbamazepina. Antipsicóticos atípicos (quetiapina, olanzapina, aripiprazol). Lamotrigina (prevenção depressão). EVITAR antidepressivos em monoterapia",redflags:"Ciclagem rápida, episódio misto, uso de substâncias ativo, não-adesão ao lítio, sintomas psicóticos → urgência psiquiátrica",instrumentos:"MDQ (triagem), YMRS (mania), PHQ-9 (depressão), gráfico de humor",diferencial:"TDAH, transtorno esquizoafetivo, uso de substâncias (estimulantes), hipertireoidismo, personalidade borderline"},
+"6A81":{nome:"Transtorno Bipolar Tipo II",cat:"Transtornos do Humor",prevalencia:"~0.4-1.1%. Frequentemente subdiagnosticado como depressão unipolar",criterios:"Pelo menos 1 episódio hipomaníaco (≥4 dias) + pelo menos 1 episódio depressivo maior. Nunca episódio maníaco completo.",comorbidades:"Ansiedade (60%), uso de substâncias, transtornos alimentares, transtornos de personalidade",abordagens:"Psicoeducação, TCC para bipolar, IPSRT, monitoramento de humor, higiene do sono, identificação precoce de hipomania",medicacoes:"Lamotrigina (1ª linha para prevenção depressiva), lítio, quetiapina. Antidepressivos com cautela e sempre com estabilizador",redflags:"Virada maníaca com antidepressivo, ciclagem rápida, ideação suicida (risco maior que bipolar I)",instrumentos:"MDQ, HCL-32 (hipomania), PHQ-9",diferencial:"Depressão unipolar recorrente, ciclotimia, TDAH, personalidade borderline"},
+"6B00":{nome:"Transtorno de Ansiedade Generalizada (TAG)",cat:"Ansiedade",prevalencia:"~3.7% global; razão M:F ~1:2. Curso crônico com flutuações",criterios:"Ansiedade e preocupação excessiva sobre diversos eventos/atividades por ≥6 meses + dificuldade de controlar a preocupação + ≥3 sintomas somáticos (inquietação, fadiga, concentração, irritabilidade, tensão muscular, insônia).",comorbidades:"Depressão (60-70%), outros transtornos de ansiedade, insônia, síndrome do intestino irritável, dor crônica",abordagens:"TCC (forte evidência), técnicas de relaxamento, reestruturação cognitiva, exposição a preocupações, ACT, mindfulness, regulação emocional",medicacoes:"ISRS (escitalopram, sertralina), IRSN (venlafaxina, duloxetina), pregabalina, buspirona. Benzodiazepínicos apenas curto prazo. Propranolol (sintomas somáticos)",redflags:"Comorbidade depressiva grave, uso crônico de benzodiazepínicos, ideação suicida, somatização intensa → avaliação médica",instrumentos:"GAD-7 (rastreio/monitoramento), BAI, DASS-21, Penn State Worry Questionnaire",diferencial:"Pânico, fobia social, TOC, TEPT, hipertireoidismo, uso de cafeína/estimulantes, abstinência"},
+"6B01":{nome:"Transtorno de Pânico",cat:"Ansiedade",prevalencia:"~2-3%; razão M:F ~1:2. Início típico no final da adolescência/início adulto",criterios:"Ataques de pânico inesperados recorrentes + preocupação persistente sobre novos ataques ou consequências + mudanças de comportamento (evitação).",comorbidades:"Agorafobia (30-50%), depressão, TAG, uso de álcool (automedicação), hipocondria",abordagens:"TCC com reeducação respiratória e exposição interoceptiva (padrão-ouro), psicoeducação sobre ciclo do pânico, relaxamento aplicado, dessensibilização sistemática",medicacoes:"ISRS (1ª linha), IRSN, clonazepam (curto prazo para controle inicial), TCC deve ser priorizada sobre farmacoterapia",redflags:"Ataques de pânico com sintomas atípicos → descartar causas médicas (cardíacas, tireoidianas, feocromocitoma)",instrumentos:"PDSS (severidade), GAD-7, inventário de sensações corporais",diferencial:"TAG, fobia específica, TEPT, condições médicas (arritmias, hipertireoidismo), uso de substâncias"},
+"6B03":{nome:"Fobia Social (Transtorno de Ansiedade Social)",cat:"Ansiedade",prevalencia:"~5-12%; uma das mais comuns. Início típico na adolescência",criterios:"Medo ou ansiedade acentuada sobre situações sociais com possível escrutínio. Evitação ou sofrimento intenso. Desproporcional ao risco. Persistente (≥6 meses).",comorbidades:"Depressão (50%), uso de álcool, TAG, transtorno evitativo de personalidade",abordagens:"TCC com exposição gradual (padrão-ouro), treinamento de habilidades sociais, reestruturação cognitiva (foco em crenças sobre avaliação), ACT, role-play",medicacoes:"ISRS (1ª linha: paroxetina, sertralina), IRSN (venlafaxina), propranolol (ansiedade de performance), fenelzina (casos refratários)",redflags:"Isolamento social completo, comorbidade depressiva grave, uso de álcool como automedicação",instrumentos:"LSAS (Liebowitz), SPIN, escala de evitação social",diferencial:"TAG, agorafobia, mutismo seletivo, transtorno evitativo, autismo (dificuldade social vs medo de julgamento)"},
+"6B20":{nome:"Transtorno Obsessivo-Compulsivo (TOC)",cat:"TOC e Relacionados",prevalencia:"~1.5-3%; igual entre sexos. Bimodal: infância e início adulto",criterios:"Obsessões (pensamentos intrusivos recorrentes) e/ou compulsões (comportamentos repetitivos em resposta a obsessões) que consomem tempo (≥1h/dia) ou causam sofrimento significativo.",comorbidades:"Depressão (60-70%), ansiedade, tiques, TDAH, transtornos alimentares, dismorfismo corporal",abordagens:"Exposição com Prevenção de Resposta (EPR) — padrão-ouro, TCC com reestruturação cognitiva, ACT, psicoeducação sobre a natureza das obsessões (normalização)",medicacoes:"ISRS em doses altas (fluoxetina 40-80mg, fluvoxamina 200-300mg, sertralina 150-200mg), clomipramina. Augmentação com antipsicóticos atípicos em refratários",redflags:"TOC com insight ausente (pode parecer delírio), acumulação grave, compulsões com autolesão, TOC perinatal",instrumentos:"Y-BOCS (padrão-ouro), OCI-R (triagem), DOCS",diferencial:"TAG (preocupações vs obsessões), transtorno dismórfico, tricotilomania, transtorno de acumulação, esquizofrenia"},
+"6B40":{nome:"TEPT — Transtorno de Estresse Pós-Traumático",cat:"Estresse e Trauma",prevalencia:"~3.9% global; até 30% em populações expostas a trauma. Razão M:F ~1:2",criterios:"Exposição a evento traumático + reexperiência (flashbacks, pesadelos) + evitação de lembretes + alterações negativas em cognição/humor + hiperativação (hipervigilância, resposta de sobressalto). Duração >1 mês.",comorbidades:"Depressão (50%), uso de substâncias (40%), TAG, pânico, dissociação, dor crônica, TBI",abordagens:"EMDR (forte evidência), Terapia de Exposição Prolongada (Foa), TCC focada no trauma, Processamento Cognitivo (CPT), Terapia Narrativa, estabilização antes de processamento em trauma complexo",medicacoes:"ISRS (sertralina, paroxetina — aprovados para TEPT), IRSN (venlafaxina), prazosina (pesadelos). Evitar benzodiazepínicos (pioram prognóstico)",redflags:"Dissociação grave, flashbacks com desrealização, risco suicida elevado, trauma contínuo (violência doméstica), sintomas psicóticos",instrumentos:"PCL-5 (rastreio/monitoramento), CAPS-5 (padrão-ouro diagnóstico), IES-R, LEC-5 (checklist de eventos)",diferencial:"Transtorno de adaptação, transtorno de estresse agudo, TEPT complexo, depressão, TAG, transtorno dissociativo"},
+"6B41":{nome:"TEPT Complexo",cat:"Estresse e Trauma",prevalencia:"Prevalência em estudo; mais comum em trauma interpessoal crônico (abuso infantil, violência doméstica)",criterios:"Todos os critérios de TEPT + perturbações na autorregulação (desregulação emocional) + autoconceito negativo (vergonha, culpa, sensação de estar danificado) + dificuldades nos relacionamentos.",comorbidades:"Depressão crônica, dissociação, transtorno de personalidade borderline, uso de substâncias, somatização",abordagens:"Abordagem faseada: 1) Estabilização e regulação emocional, 2) Processamento do trauma, 3) Reintegração social. Schema therapy, DBT adaptada, EMDR com estabilização prévia",medicacoes:"Semelhante ao TEPT simples. Maior necessidade de polifarmácia. Antipsicóticos atípicos em doses baixas para dissociação",redflags:"Dissociação estrutural, automutilação, tentativas de suicídio, revitimização ativa",instrumentos:"ITQ (International Trauma Questionnaire), PCL-5 + módulo de desregulação",diferencial:"TEPT simples, personalidade borderline, transtorno dissociativo de identidade, depressão crônica"},
+"6D10":{nome:"Transtorno de Personalidade",cat:"Personalidade",prevalencia:"~10% na população geral; mais diagnosticado em serviços de saúde mental",criterios:"Padrão duradouro de experiência interna e comportamento que se desvia da cultura. Cognitivo, afetivo, interpessoal e controle de impulsos. Inflexível e invasivo. Início na adolescência/adulto jovem.",comorbidades:"Depressão, ansiedade, uso de substâncias, transtornos alimentares, TEPT",abordagens:"Terapia do esquema, DBT (borderline), mentalização (MBT), TCC focada em personalidade, terapia interpessoal. Longo prazo (1-3 anos)",medicacoes:"Não há medicação específica. Tratar sintomas-alvo: ISRS (impulsividade), estabilizadores (desregulação afetiva), antipsicóticos baixa dose (distorções cognitivas). Evitar benzodiazepínicos",redflags:"Autolesão crônica, tentativas de suicídio, rompimentos terapêuticos recorrentes, idealização/desvalorização do terapeuta",instrumentos:"PID-5 (dimensional, CID-11), SCID-5-PD (DSM-5), IPO (organização da personalidade)",diferencial:"Bipolar II, TEPT complexo, TDAH (impulsividade), uso de substâncias"}
+};
+
+var _cidSearchTimer=null;
+function debounceCidSearch(val){
+  window._cidSearch=val;window._selectedCid=null;
+  clearTimeout(_cidSearchTimer);
+  _cidSearchTimer=setTimeout(function(){
+    var el=document.getElementById('app');
+    if(el)renderGuiaClinico(el);
+    // Restore focus and cursor position
+    var inp=document.getElementById('cidSearchInput');
+    if(inp){inp.focus();inp.setSelectionRange(inp.value.length,inp.value.length)}
+  },300);
+}
+function renderGuiaClinico(el){
+  var searchVal=window._cidSearch||'';
+  var selectedCid=window._selectedCid||null;
+  var html='<div style="margin-bottom:20px"><h2 style="font-family:var(--fontD);font-size:28px;font-style:italic">Guia Clínico CID-11</h2><p style="font-size:13px;color:var(--textMuted);margin-top:4px">Diagnósticos psiquiátricos — critérios, abordagens e referências</p></div>';
+  // Search
+  html+='<input type="text" id="cidSearchInput" placeholder="Buscar diagnóstico por nome ou código CID..." value="'+searchVal+'" oninput="debounceCidSearch(this.value)" style="width:100%;margin-bottom:20px;padding:13px 18px;border-radius:var(--radiusFull);border:1.5px solid rgba(28,25,23,.08);font-size:14px;background:rgba(244,242,238,.5)">';
+  // List or detail view
+  if(selectedCid && CID_GUIDE[selectedCid]){
+    var g=CID_GUIDE[selectedCid];
+    html+='<button class="btn btn-o btn-s" onclick="window._selectedCid=null;renderApp()" style="margin-bottom:16px">← Voltar</button>';
+    html+='<div class="card" style="padding:24px">';
+    html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px"><span style="font-size:13px;padding:4px 12px;background:var(--primaryFaded);border-radius:var(--radiusFull);font-weight:700;color:var(--text)">'+selectedCid+'</span><span style="font-size:11px;padding:4px 10px;background:rgba(124,92,252,.08);color:#7C5CFC;border-radius:var(--radiusFull);font-weight:600">'+g.cat+'</span></div>';
+    html+='<h3 style="font-size:20px;font-weight:700;margin-bottom:16px">'+g.nome+'</h3>';
+    var sections=[
+      {icon:'📊',title:'Prevalência',content:g.prevalencia},
+      {icon:'📋',title:'Critérios Diagnósticos',content:g.criterios},
+      {icon:'🔗',title:'Comorbidades Comuns',content:g.comorbidades},
+      {icon:'🎯',title:'Abordagens Terapêuticas',content:g.abordagens},
+      {icon:'💊',title:'Medicações Comuns',content:g.medicacoes},
+      {icon:'⚠️',title:'Red Flags — Encaminhamento',content:g.redflags},
+      {icon:'📝',title:'Instrumentos de Avaliação',content:g.instrumentos},
+      {icon:'🔄',title:'Diagnóstico Diferencial',content:g.diferencial}
+    ];
+    sections.forEach(function(s){
+      html+='<div style="margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid rgba(28,25,23,.06)"><div style="font-size:12px;font-weight:700;color:var(--textLight);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">'+s.icon+' '+s.title+'</div><div style="font-size:14px;line-height:1.7;color:var(--text)">'+s.content+'</div></div>';
+    });
+    // Link patient CIDs
+    var pacComCid=D.pacientes.filter(function(p){return p.ativo!==false&&(p.cids||[]).some(function(c){return c.code===selectedCid})});
+    if(pacComCid.length){
+      html+='<div style="margin-top:8px"><div style="font-size:12px;font-weight:700;color:var(--textLight);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">👥 Seus pacientes com este diagnóstico</div>';
+      pacComCid.forEach(function(p){html+='<div style="display:inline-block;margin:4px 6px 4px 0;padding:6px 14px;background:var(--primaryFaded);border-radius:var(--radiusFull);font-size:13px;font-weight:600;cursor:pointer" onclick="openPerfil(\''+p.id+'\')">'+p.nome+'</div>'});
+      html+='</div>';
+    }
+    html+='</div>';
+  } else {
+    // List all CIDs with guide
+    var guideKeys=Object.keys(CID_GUIDE);
+    if(searchVal){
+      var sv=searchVal.toLowerCase();
+      guideKeys=guideKeys.filter(function(k){var g=CID_GUIDE[k];return k.toLowerCase().includes(sv)||g.nome.toLowerCase().includes(sv)||g.cat.toLowerCase().includes(sv)});
+    }
+    // Group by category
+    var cats={};guideKeys.forEach(function(k){var g=CID_GUIDE[k];if(!cats[g.cat])cats[g.cat]=[];cats[g.cat].push(k)});
+    var catOrder=['Neurodesenvolvimento','Transtornos do Humor','Ansiedade','TOC e Relacionados','Estresse e Trauma','Personalidade'];
+    catOrder.forEach(function(cat){
+      if(!cats[cat])return;
+      html+='<div style="margin-bottom:24px"><div style="font-size:12px;font-weight:700;color:var(--textLight);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">'+cat+'</div>';
+      cats[cat].forEach(function(k){
+        var g=CID_GUIDE[k];
+        html+='<div class="card" style="padding:16px;margin-bottom:8px;cursor:pointer" onclick="window._selectedCid=\''+k+'\';renderApp()"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:12px;font-weight:700;color:var(--accent);min-width:50px">'+k+'</span><div style="flex:1"><div style="font-weight:600;font-size:14px">'+g.nome+'</div><div style="font-size:12px;color:var(--textMuted);margin-top:2px">'+g.prevalencia.substring(0,60)+'...</div></div><span style="color:var(--textFaint);font-size:18px">→</span></div></div>';
+      });
+      html+='</div>';
+    });
+    if(guideKeys.length===0){
+      html+='<div style="text-align:center;padding:40px 20px;color:var(--textMuted)">Nenhum diagnóstico encontrado para "'+searchVal+'"</div>';
+    }
+    // Also show all CID11 codes (the full list from the database)
+    if(!searchVal){
+      html+='<div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(28,25,23,.06)"><div style="font-size:12px;font-weight:700;color:var(--textLight);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Todos os códigos CID-11 e CID-10</div><p style="font-size:12px;color:var(--textMuted);margin-bottom:12px">'+CID11.length+' diagnósticos disponíveis para cadastro de pacientes. Os acima possuem guia clínico expandido.</p></div>';
+    }
+  }
+  el.innerHTML=html;
+}
+
 // === FINANCEIRO ===
 function navFinMes(dir){var p=finMes.split('-');var y=parseInt(p[0]),m=parseInt(p[1])+dir;if(m>12){m=1;y++}if(m<1){m=12;y--}finMes=y+'-'+pad(m);renderApp()}
 function renderFin(el){
   syncPayments();
   var mLabel=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   var mp=finMes.split('-');var mesNome=mLabel[parseInt(mp[1])-1]+' '+mp[0];
-  var allMonth=D.pagamentos.filter(function(p){return p.data&&p.data.substring(0,7)===finMes});
+  var inactiveIds={};D.pacientes.forEach(function(p){if(p.ativo===false)inactiveIds[p.id]=true});
+  var allMonth=D.pagamentos.filter(function(p){return p.data&&p.data.substring(0,7)===finMes&&!inactiveIds[p.pacienteId]});
   var totP=allMonth.filter(function(p){return p.status==='pendente'}).reduce(function(a,b){return a+(b.valor||0)},0);
   var totR=allMonth.filter(function(p){return p.status==='pago'}).reduce(function(a,b){return a+(b.valor||0)},0);
-  var header='<div class="card" style="background:linear-gradient(145deg,#2D2335,#4A3D5E,#5C4A72);color:#fff;padding:28px;border-radius:16px;margin-bottom:24px"><div style="font-size:13px;opacity:.8">'+fmtD(today())+'</div><div style="font-size:28px;font-weight:800;margin:4px 0 16px">'+(new Date().getHours()<12?'Bom dia':new Date().getHours()<18?'Boa tarde':'Boa noite')+'</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div><div style="font-size:11px;text-transform:uppercase;opacity:.7">Pacientes</div><div style="font-size:28px;font-weight:800">'+D.pacientes.filter(function(p){return p.ativo!==false}).length+'</div></div><div><div style="font-size:11px;text-transform:uppercase;opacity:.7">Recebido</div><div style="font-size:24px;font-weight:800">'+fmt$(totR)+'</div></div><div><div style="font-size:11px;text-transform:uppercase;opacity:.7">Pendente</div><div style="font-size:24px;font-weight:800;color:#fca5a5">'+fmt$(totP)+'</div></div><div><div style="font-size:11px;text-transform:uppercase;opacity:.7">Total</div><div style="font-size:24px;font-weight:800">'+fmt$(totR+totP)+'</div></div></div></div>'+
-  '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px"><h2 style="font-family:var(--fontD);font-size:28px;font-style:italic">Financeiro</h2><button class="btn btn-p btn-s" onclick="addPagGlobal()">+ Lançamento</button></div>'+
+  var header='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px"><h2 style="font-family:var(--fontD);font-size:28px;font-style:italic">Financeiro</h2><button class="btn btn-p btn-s" onclick="addPagGlobal()">+ Lançamento</button></div>'+
   '<div class="card" style="padding:12px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between"><button class="btn btn-g" onclick="navFinMes(-1)">◀</button><span style="font-weight:700;font-size:17px">'+mesNome+'</span><button class="btn btn-g" onclick="navFinMes(1)">▶</button></div>'+
-  '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px"><div class="card stat-card" style="min-width:0;cursor:pointer;'+(finF==='pendente'?'outline:2px solid var(--danger)':'')+'" onclick="finF=finF===\'pendente\'?\'todos\':\'pendente\';renderApp()"><div class="stat-label">Pendente</div><div class="stat-val" style="color:var(--danger);font-size:16px">'+fmt$(totP)+'</div></div><div class="card stat-card" style="min-width:0;cursor:pointer;'+(finF==='pago'?'outline:2px solid #16a34a':'')+'" onclick="finF=finF===\'pago\'?\'todos\':\'pago\';renderApp()"><div class="stat-label">Recebido</div><div class="stat-val" style="color:#16a34a;font-size:16px">'+fmt$(totR)+'</div></div><div class="card stat-card" style="min-width:0;cursor:pointer;'+(finF==='todos'?'outline:2px solid var(--text)':'')+'" onclick="finF=\'todos\';renderApp()"><div class="stat-label">Total</div><div class="stat-val" style="color:var(--text);font-size:16px">'+fmt$(totP+totR)+'</div></div></div>';
+  '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px"><div class="card stat-card" style="min-width:0;cursor:pointer;'+(finF==='pendente'?'outline:2px solid var(--danger)':'')+'" onclick="finF=finF===\'pendente\'?\'todos\':\'pendente\';renderApp()"><div class="stat-label">Pendente</div><div class="stat-val" style="color:var(--danger);font-size:14px">'+fmt$(totP)+'</div></div><div class="card stat-card" style="min-width:0;cursor:pointer;'+(finF==='pago'?'outline:2px solid #16a34a':'')+'" onclick="finF=finF===\'pago\'?\'todos\':\'pago\';renderApp()"><div class="stat-label">Recebido</div><div class="stat-val" style="color:#16a34a;font-size:14px">'+fmt$(totR)+'</div></div><div class="card stat-card" style="min-width:0;cursor:pointer;'+(finF==='todos'?'outline:2px solid var(--text)':'')+'" onclick="finF=\'todos\';renderApp()"><div class="stat-label">Total</div><div class="stat-val" style="color:var(--text);font-size:14px">'+fmt$(totP+totR)+'</div></div></div>';
   // View toggle
   var viewToggle='<div style="display:flex;gap:8px;margin-bottom:16px"><button class="btn btn-s '+(finView==='lista'?'btn-p':'btn-o')+'" onclick="finView=\'lista\';renderApp()">Lista</button><button class="btn btn-s '+(finView==='resumo'?'btn-p':'btn-o')+'" onclick="finView=\'resumo\';renderApp()">Resumo Mensal</button></div>';
   if(finView==='resumo'){
@@ -3070,10 +3236,28 @@ function renderConfig(el){
   '<h2 style="font-family:var(--fontD);font-size:24px;margin-bottom:20px">Configurações</h2>'+
   '<div class="card" style="padding:20px;margin-bottom:16px"><h3 style="font-size:16px;font-weight:600;margin-bottom:12px">Dados Armazenados</h3>'+
   '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px"><div style="text-align:center"><div style="font-size:24px;font-weight:700;color:var(--primary)">'+stats.pac+'</div><div style="font-size:11px;color:var(--textMuted)">Pacientes</div></div><div style="text-align:center"><div style="font-size:24px;font-weight:700;color:#4361EE">'+stats.sess+'</div><div style="font-size:11px;color:var(--textMuted)">Sessões</div></div><div style="text-align:center"><div style="font-size:24px;font-weight:700;color:var(--accent)">'+stats.pag+'</div><div style="font-size:11px;color:var(--textMuted)">Pagamentos</div></div><div style="text-align:center"><div style="font-size:24px;font-weight:700;color:#6B705C">'+stats.docs+'</div><div style="font-size:11px;color:var(--textMuted)">Documentos</div></div><div style="text-align:center"><div style="font-size:24px;font-weight:700;color:#7c3aed">'+stats.tst+'</div><div style="font-size:11px;color:var(--textMuted)">Testes</div></div></div></div>'+
-  '<div class="card" style="padding:20px;margin-bottom:16px;border:1.5px solid var(--primary)"><h3 style="font-size:16px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px"><span style="font-size:18px">\u2601</span> Nuvem Concordia</h3>'+
-  '<p style="font-size:13px;color:var(--textMuted);margin-bottom:12px">Backup na nuvem e acesso multi-dispositivo. Seus dados ficam criptografados e isolados por conta.</p>'+
+  '<div class="card" style="padding:20px;margin-bottom:16px;border:1.5px solid var(--accent)"><h3 style="font-size:16px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px"><span style="font-size:18px">\ud83e\udde0</span> IA Cl\u00ednica (Claude)</h3>'+
+  '<p style="font-size:13px;color:var(--textMuted);margin-bottom:12px">An\u00e1lise funcional autom\u00e1tica via Behaviorismo Radical e RFT. Requer chave da API Anthropic.</p>'+
+  '<div class="field" style="margin-bottom:10px"><label>API Key</label><input type="password" id="cfgApiKey" value="'+(localStorage.getItem("cf_api_key")||"")+'" placeholder="sk-ant-..." onchange="localStorage.setItem(\'cf_api_key\',this.value);toast(\'Chave salva\')"></div>'+
+  '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><label style="font-size:13px;font-weight:500">Auto-analisar ao salvar sess\u00e3o com transcri\u00e7\u00e3o</label><input type="checkbox" id="cfgAutoAI" '+(CFG.autoAI?'checked':'')+' onchange="CFG.autoAI=this.checked;saveCfg()"></div>'+
+  '<p style="font-size:11px;color:var(--textLight)">Custo estimado: ~R$0,05 por sess\u00e3o analisada (Claude Sonnet). Dados enviados \u00e0 API Anthropic (zero-retention).</p></div>'+
+  '<div class="card" style="padding:20px;margin-bottom:16px;border:1.5px solid var(--primary)"><h3 style="font-size:16px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px"><span style="font-size:18px">\u2601</span> Google Drive</h3>'+
+  '<p style="font-size:13px;color:var(--textMuted);margin-bottom:12px">Backup no seu Google Drive pessoal. Seus dados ficam no seu próprio Google.</p>'+
   '<div id="syncStatusArea"></div>'+
-  (sbAuth()?'<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-p" onclick="sbPush().then(function(){renderApp()})">Enviar para Nuvem</button><button class="btn btn-o" onclick="sbPull()">Restaurar da Nuvem</button><button class="btn btn-g btn-s" onclick="openCloudAuth()">Gerenciar</button></div>':'<button class="btn btn-p" onclick="openCloudAuth()">Conectar \u00e0 Nuvem</button>')+
+  (gdAuth()?'<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-p" onclick="gdPush()">Enviar para Drive</button><button class="btn btn-o" onclick="gdPull()">Restaurar do Drive</button><button class="btn btn-g btn-s" onclick="openCloudAuth()">Gerenciar</button></div>':'<button class="btn btn-p" onclick="openCloudAuth()">Conectar ao Google Drive</button>')+
+  '</div>'+
+  // CLOUD SYNC CARD
+  '<div class="card" style="padding:20px;margin-bottom:16px;border:1.5px solid #7C5CFC"><h3 style="font-size:16px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px"><span style="font-size:18px">☁️</span> Nuvem Concordia</h3>'+
+  '<p style="font-size:13px;color:var(--textMuted);margin-bottom:12px">Dados sincronizados na nuvem. Acesse de qualquer dispositivo. Nunca perca dados.</p>'+
+  (supaUser?
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 14px;background:var(--surfaceAlt);border-radius:10px"><div style="width:8px;height:8px;border-radius:50%;background:#2F8A52"></div><div style="flex:1"><div style="font-size:13px;font-weight:600">'+supaUser.email+'</div><div style="font-size:11px;color:var(--textMuted)">Conectado</div></div></div>'+
+    '<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-p btn-s" onclick="cloudPush().then(function(){toast(\'Dados enviados\')})">Enviar para nuvem</button><button class="btn btn-o btn-s" onclick="cloudPull().then(function(){renderApp();toast(\'Dados restaurados\')})">Restaurar da nuvem</button><button class="btn btn-g btn-s" onclick="supaLogout()">Desconectar</button></div>'
+  :
+    '<div id="cloudLoginForm">'+
+    '<div class="field" style="margin-bottom:8px"><label>E-mail</label><input type="email" id="cloudEmail" placeholder="seu@email.com"></div>'+
+    '<div class="field" style="margin-bottom:12px"><label>Senha</label><input type="password" id="cloudPass" placeholder="mínimo 6 caracteres"></div>'+
+    '<div style="display:flex;gap:10px"><button class="btn btn-p" onclick="var e=document.getElementById(\'cloudEmail\').value,p=document.getElementById(\'cloudPass\').value;supaLogin(e,p).catch(function(err){toast(\'Erro: \'+err.message)})">Entrar</button><button class="btn btn-o" onclick="var e=document.getElementById(\'cloudEmail\').value,p=document.getElementById(\'cloudPass\').value;supaSignup(e,p).catch(function(err){toast(\'Erro: \'+err.message)})">Criar conta</button></div></div>'
+  )+
   '</div>'+
   '<div class="card" style="padding:20px;margin-bottom:16px"><h3 style="font-size:16px;font-weight:600;margin-bottom:12px">Backup</h3>'+
   '<p style="font-size:13px;color:var(--textMuted);margin-bottom:16px">Exporte seus dados para manter um backup seguro ou transfira para outro dispositivo.</p>'+
@@ -3091,8 +3275,7 @@ function renderConfig(el){
   '<p style="font-size:13px;color:var(--textMuted);margin-bottom:12px">Gere formulários para o paciente preencher sozinho. O paciente recebe um código que você importa no app.</p>'+
   '<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-p btn-s" onclick="compartilharCadastro()">Enviar Cadastro via WhatsApp</button><button class="btn btn-o btn-s" onclick="importarCodigoCadastro()">Importar Código de Cadastro</button></div></div>'+
   '<div class="card" style="padding:20px;margin-bottom:20px"><h3 style="font-family:var(--fontD);font-size:18px;margin-bottom:12px">Perfil Profissional</h3><div style="display:flex;align-items:center;gap:16px;margin-bottom:12px"><div style="width:50px;height:50px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700">'+(PROF.nome?PROF.nome[0].toUpperCase():'?')+'</div><div><div style="font-weight:600;font-size:16px">'+PROF.nome+'</div><div style="font-size:13px;color:var(--textMuted)">CRP: '+PROF.crp+'</div></div></div><button class="btn btn-o btn-s" onclick="editProfModal()">Editar perfil</button></div>'+
-  '<div class="card" style="padding:20px"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700">Conta Concordia</div><div style="font-size:13px;color:var(--textMuted);margin-top:4px">'+(CURRENT_USER?CURRENT_USER.email:'')+'</div></div><button class="btn btn-o" onclick="logout()">Sair</button></div></div>'+
-  '<div class="card" style="padding:20px;background:var(--successBg)"><p style="font-size:13px;color:var(--success)">Seus dados são salvos automaticamente na nuvem Concordia. Acessível de qualquer dispositivo.</p></div>'+
+  '<div class="card" style="padding:20px;background:#FFF8E1;border-color:#FFE082"><p style="font-size:13px;color:#F57C00">Os dados são armazenados no navegador (localStorage). Faça backups regulares. Limpar dados do navegador ou desinstalar apaga tudo.</p></div>'+
   '<input type="file" id="importFile" accept="*/*" style="display:none" onchange="importData(this)">';
   setTimeout(updateSyncUI,50);
 }
@@ -3146,213 +3329,112 @@ document.addEventListener('keydown',function(e){
   if(e.key==='Escape'){closeSearch();hideModal();closeDP();closeTP()}
 });
 
-// === CLOUD SYNC (Concordia MedOps) ===
-var SB_URL='https://kizwfarfzyuodhugkler.supabase.co';
-var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtpendmYXJmenl1b2RodWdrbGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5ODU0NDksImV4cCI6MjA4ODU2MTQ0OX0.0wa0SH7-tvXxQo6KBE2J6O3I-2tEDYgdSkfqMrhMFF0';
-var SB_AUTH_KEY='clinica_facil_sb_auth';
-var syncStatus='idle'; // idle, syncing, success, error
+// === CLOUD SYNC (Google Drive) ===
+var GD_CLIENT_ID='51267010253-a3s1usuadfk8fkdhqn6c3gn4q0j3ur1j.apps.googleusercontent.com';
+var GD_SCOPE='https://www.googleapis.com/auth/drive.file';
+var GD_FILE_NAME='ClinicaFacil_backup.json';
+var gdTokenClient=null;
+var syncStatus='idle';
 var syncMsg='';
 
-function sbAuth(){return null}
-function sbSaveAuth(d){}
-function sbClearAuth(){localStorage.removeItem(SB_AUTH_KEY)}
-function sbHeaders(token){return{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+(token||SB_KEY)}}
+function gdInit(){
+  if(typeof google==='undefined'||!google.accounts)return;
+  gdTokenClient=google.accounts.oauth2.initTokenClient({
+    client_id:GD_CLIENT_ID,
+    scope:GD_SCOPE,
+    callback:function(resp){
+      if(resp.error){syncStatus='error';syncMsg='Erro: '+resp.error;updateSyncUI();return}
+      localStorage.setItem('gd_token',resp.access_token);
+      localStorage.setItem('gd_token_exp',''+(Date.now()+(resp.expires_in*1000)));
+      toast('Conectado ao Google Drive!');
+      renderApp();
+    }
+  });
+}
+// Try init on load, retry after GIS loads
+setTimeout(gdInit,1000);setTimeout(gdInit,3000);
 
-async function sbSignup(email,pass,nome,crp){
-  try{
-    var r=await fetch(SB_URL+'/auth/v1/signup',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY},
-      body:JSON.stringify({email:email,password:pass,data:{nome:nome,crp:crp}})});
-    var d=await r.json();
-    if(d.error)return{ok:false,msg:d.error.message||d.msg||'Erro no cadastro'};
-    if(d.access_token){sbSaveAuth(d);return{ok:true,msg:'Conta criada e conectada!'}}
-    return{ok:true,msg:'Verifique seu email para confirmar a conta.'}
-  }catch(e){return{ok:false,msg:'Sem conexão: '+e.message}}
+function gdAuth(){
+  var t=localStorage.getItem('gd_token');
+  var exp=localStorage.getItem('gd_token_exp');
+  if(t&&exp&&Date.now()<parseInt(exp))return t;
+  localStorage.removeItem('gd_token');localStorage.removeItem('gd_token_exp');
+  return null;
 }
 
-async function sbLogin(email,pass){
-  try{
-    var r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY},
-      body:JSON.stringify({email:email,password:pass})});
-    var d=await r.json();
-    if(d.error)return{ok:false,msg:d.error.message||d.msg||'Email ou senha incorretos'};
-    sbSaveAuth(d);return{ok:true,msg:'Conectado!'}
-  }catch(e){return{ok:false,msg:'Sem conexão: '+e.message}}
+function gdConnect(){
+  if(!gdTokenClient){gdInit();if(!gdTokenClient){toast('Google não carregou ainda. Aguarde e tente novamente.');return}}
+  gdTokenClient.requestAccessToken();
 }
 
-function sbLogout(){sbClearAuth();toast('Desconectado da nuvem');renderApp()}
-
-async function sbRefreshToken(){
-  var auth=sbAuth();if(!auth||!auth.refresh_token)return null;
-  try{
-    var r=await fetch(SB_URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{'Content-Type':'application/json','apikey':SB_KEY},
-      body:JSON.stringify({refresh_token:auth.refresh_token})});
-    var d=await r.json();
-    if(d.access_token){sbSaveAuth(d);return d.access_token}
-    sbClearAuth();return null;
-  }catch(e){return null}
+function gdDisconnect(){
+  var t=gdAuth();
+  if(t)try{google.accounts.oauth2.revoke(t)}catch(e){}
+  localStorage.removeItem('gd_token');localStorage.removeItem('gd_token_exp');
+  toast('Desconectado do Google Drive');
+  renderApp();
 }
 
-async function sbToken(){
-  var auth=sbAuth();if(!auth)return null;
-  // Check if token expired (JWT exp)
-  try{var payload=JSON.parse(atob(auth.access_token.split('.')[1]));
-    if(payload.exp*1000<Date.now()-60000)return await sbRefreshToken();
-    return auth.access_token;
-  }catch(e){return await sbRefreshToken()}
+async function gdFindFile(token){
+  var r=await fetch('https://www.googleapis.com/drive/v3/files?q=name%3D%27'+encodeURIComponent(GD_FILE_NAME)+'%27+and+trashed%3Dfalse&spaces=drive&fields=files(id,name,modifiedTime)',{
+    headers:{'Authorization':'Bearer '+token}});
+  if(!r.ok)throw new Error('Busca falhou: '+r.status);
+  var d=await r.json();
+  return(d.files&&d.files.length)?d.files[0]:null;
 }
 
-async function sbPush(){
-  var token=await sbToken();if(!token){syncStatus='error';syncMsg='Não autenticado';return false}
-  var auth=sbAuth();var userId=auth.user?auth.user.id:null;
-  if(!userId){try{var p=JSON.parse(atob(token.split('.')[1]));userId=p.sub}catch(e){}}
-  if(!userId){syncStatus='error';syncMsg='User ID não encontrado';return false}
-  
-  syncStatus='syncing';syncMsg='Enviando dados...';updateSyncUI();
-  
+async function gdPush(){
+  var token=gdAuth();
+  if(!token){gdConnect();return}
+  syncStatus='syncing';syncMsg='Enviando para Google Drive...';updateSyncUI();
   try{
-    // Push pacientes
-    var pacData=D.pacientes.map(function(p){return{
-      user_id:userId,local_id:p.id,nome:p.nome,cpf:p.cpf||null,telefone:p.telefone||null,
-      email:p.email||null,nascimento:p.nascimento||null,queixas:p.queixas||null,
-      modalidade:p.modalidade||'sessao',valor:p.valor||0,qtd_pacote:p.qtdPacote||0,
-      ativo:p.ativo!==false,cids:JSON.stringify(p.cids||[]),meds:JSON.stringify(p.meds||[])
-    }});
-    
-    if(pacData.length){
-      // Delete existing and re-insert (simple full sync)
-      await fetch(SB_URL+'/rest/v1/pacientes?user_id=eq.'+userId,{method:'DELETE',headers:sbHeaders(token)});
-      var r=await fetch(SB_URL+'/rest/v1/pacientes',{method:'POST',headers:Object.assign(sbHeaders(token),{'Prefer':'return=minimal'}),body:JSON.stringify(pacData)});
-      if(!r.ok){var e=await r.text();throw new Error('pacientes: '+e)}
+    var backup=JSON.stringify({pacientes:D.pacientes,sessoes:D.sessoes,pagamentos:D.pagamentos,documentos:D.documentos||[],testes:D.testes||[],evolucoes:D.evolucoes||[],config:D.config||{},exportDate:new Date().toISOString()});
+    var existing=await gdFindFile(token);
+    if(existing){
+      var r=await fetch('https://www.googleapis.com/upload/drive/v3/files/'+existing.id+'?uploadType=media',{
+        method:'PATCH',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:backup});
+      if(!r.ok){var e=await r.text();throw new Error(e)}
+    }else{
+      var meta=JSON.stringify({name:GD_FILE_NAME,mimeType:'application/json'});
+      var boundary='---clinicafacil'+Date.now();
+      var body='--'+boundary+'\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n'+meta+'\r\n--'+boundary+'\r\nContent-Type: application/json\r\n\r\n'+backup+'\r\n--'+boundary+'--';
+      var r=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{
+        method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'multipart/related; boundary='+boundary},body:body});
+      if(!r.ok){var e=await r.text();throw new Error(e)}
     }
-    
-    // Get server paciente IDs for FK mapping
-    var pacMap={};
-    var pr=await fetch(SB_URL+'/rest/v1/pacientes?user_id=eq.'+userId+'&select=id,local_id',{headers:sbHeaders(token)});
-    var serverPacs=await pr.json();
-    serverPacs.forEach(function(sp){pacMap[sp.local_id]=sp.id});
-    
-    // Push sessoes
-    await fetch(SB_URL+'/rest/v1/sessoes?user_id=eq.'+userId,{method:'DELETE',headers:sbHeaders(token)});
-    var sessData=D.sessoes.map(function(s){return{
-      user_id:userId,local_id:s.id,paciente_id:pacMap[s.pacienteId]||null,
-      data:s.data,hora:s.hora,obs:s.obs||null,cal_event_id:s.calEventId||null
-    }}).filter(function(s){return s.paciente_id});
-    if(sessData.length){
-      // Chunk to avoid payload limits
-      for(var i=0;i<sessData.length;i+=200){
-        var chunk=sessData.slice(i,i+200);
-        var r2=await fetch(SB_URL+'/rest/v1/sessoes',{method:'POST',headers:Object.assign(sbHeaders(token),{'Prefer':'return=minimal'}),body:JSON.stringify(chunk)});
-        if(!r2.ok){var e2=await r2.text();throw new Error('sessoes: '+e2)}
-      }
-    }
-    
-    // Get server sessao IDs for FK mapping
-    var sessMap={};
-    var sr=await fetch(SB_URL+'/rest/v1/sessoes?user_id=eq.'+userId+'&select=id,local_id',{headers:sbHeaders(token)});
-    var serverSess=await sr.json();
-    serverSess.forEach(function(ss){sessMap[ss.local_id]=ss.id});
-    
-    // Push pagamentos
-    await fetch(SB_URL+'/rest/v1/pagamentos?user_id=eq.'+userId,{method:'DELETE',headers:sbHeaders(token)});
-    var pagData=D.pagamentos.map(function(p){return{
-      user_id:userId,local_id:p.id,paciente_id:pacMap[p.pacienteId]||null,
-      sessao_id:sessMap[p.sessaoId]||null,tipo:p.tipo||'sessao',mes:p.mes||null,
-      data:p.data,valor:p.valor,status:p.status||'pendente',data_pgto:p.dataPgto||null,obs:p.obs||null
-    }}).filter(function(p){return p.paciente_id});
-    if(pagData.length){
-      for(var i=0;i<pagData.length;i+=200){
-        var chunk=pagData.slice(i,i+200);
-        await fetch(SB_URL+'/rest/v1/pagamentos',{method:'POST',headers:Object.assign(sbHeaders(token),{'Prefer':'return=minimal'}),body:JSON.stringify(chunk)});
-      }
-    }
-    
-    // Push documentos
-    await fetch(SB_URL+'/rest/v1/documentos?user_id=eq.'+userId,{method:'DELETE',headers:sbHeaders(token)});
-    var docData=(D.documentos||[]).map(function(d){return{
-      user_id:userId,local_id:d.id,paciente_id:pacMap[d.pacienteId]||null,
-      titulo:d.titulo,tipo:d.tipo||null,corpo:d.corpo||null
-    }});
-    if(docData.length){
-      await fetch(SB_URL+'/rest/v1/documentos',{method:'POST',headers:Object.assign(sbHeaders(token),{'Prefer':'return=minimal'}),body:JSON.stringify(docData)});
-    }
-    
-    // Push testes
-    await fetch(SB_URL+'/rest/v1/testes?user_id=eq.'+userId,{method:'DELETE',headers:sbHeaders(token)});
-    var tstData=(D.testes||[]).map(function(t){return{
-      user_id:userId,local_id:t.id,paciente_id:pacMap[t.pacienteId]||null,
-      teste_nome:t.testeNome,data:t.data,score:t.score||null,nivel:t.nivel||null,
-      cor:t.cor||null,descr:t.desc||null,perfil:t.perfil?JSON.stringify(t.perfil):null,
-      respostas:t.respostas?JSON.stringify(t.respostas):null
-    }});
-    if(tstData.length){
-      await fetch(SB_URL+'/rest/v1/testes',{method:'POST',headers:Object.assign(sbHeaders(token),{'Prefer':'return=minimal'}),body:JSON.stringify(tstData)});
-    }
-    
     localStorage.setItem('clinica_last_sync',new Date().toISOString());
-    syncStatus='success';syncMsg='Backup enviado: '+D.pacientes.length+' pacientes, '+D.sessoes.length+' sessões';
-    updateSyncUI();return true;
+    syncStatus='success';syncMsg='Backup salvo: '+D.pacientes.length+' pacientes, '+(D.sessoes||[]).length+' sessões';
+    updateSyncUI();toast('Backup salvo no Google Drive!');
   }catch(e){
-    syncStatus='error';syncMsg='Erro: '+e.message;updateSyncUI();return false;
+    if(e.message&&e.message.indexOf('401')>=0){localStorage.removeItem('gd_token');localStorage.removeItem('gd_token_exp');syncMsg='Sessão expirada. Reconecte.'}
+    else{syncMsg='Erro: '+e.message}
+    syncStatus='error';updateSyncUI();
   }
 }
 
-async function sbPull(){
-  var token=await sbToken();if(!token){syncStatus='error';syncMsg='Não autenticado';return false}
-  var auth=sbAuth();var userId=auth.user?auth.user.id:null;
-  if(!userId){try{var p=JSON.parse(atob(token.split('.')[1]));userId=p.sub}catch(e){}}
-  
-  syncStatus='syncing';syncMsg='Baixando dados...';updateSyncUI();
-  
+async function gdPull(){
+  var token=gdAuth();
+  if(!token){gdConnect();return}
+  syncStatus='syncing';syncMsg='Baixando do Google Drive...';updateSyncUI();
   try{
-    // Pull pacientes
-    var pr=await fetch(SB_URL+'/rest/v1/pacientes?user_id=eq.'+userId+'&select=*',{headers:sbHeaders(token)});
-    var pacs=await pr.json();
-    if(!Array.isArray(pacs)){throw new Error(JSON.stringify(pacs))}
-    
-    var pacMap={};// server id -> local id
-    var localPacs=pacs.map(function(p){
-      var lid=p.local_id||uid();
-      pacMap[p.id]=lid;
-      return{id:lid,nome:p.nome,cpf:p.cpf||'',telefone:p.telefone||'',email:p.email||'',
-        nascimento:p.nascimento||'',queixas:p.queixas||'',modalidade:p.modalidade||'sessao',
-        valor:p.valor||0,qtdPacote:p.qtd_pacote||0,ativo:p.ativo!==false,
-        cids:typeof p.cids==='string'?JSON.parse(p.cids):(p.cids||[]),
-        meds:typeof p.meds==='string'?JSON.parse(p.meds):(p.meds||[])}
-    });
-    
-    // Pull sessoes
-    var sr=await fetch(SB_URL+'/rest/v1/sessoes?user_id=eq.'+userId+'&select=*',{headers:sbHeaders(token)});
-    var sess=await sr.json();
-    var localSess=sess.map(function(s){return{id:s.local_id||uid(),pacienteId:pacMap[s.paciente_id]||'',data:s.data,hora:s.hora,obs:s.obs||'',calEventId:s.cal_event_id||''}});
-    
-    // Pull pagamentos
-    var pgr=await fetch(SB_URL+'/rest/v1/pagamentos?user_id=eq.'+userId+'&select=*',{headers:sbHeaders(token)});
-    var pags=await pgr.json();
-    var sessMapRev={};sess.forEach(function(s){if(s.local_id)sessMapRev[s.id]=s.local_id});
-    var localPags=pags.map(function(p){return{id:p.local_id||uid(),pacienteId:pacMap[p.paciente_id]||'',sessaoId:sessMapRev[p.sessao_id]||'',tipo:p.tipo||'sessao',mes:p.mes||'',data:p.data,valor:p.valor,status:p.status||'pendente',dataPgto:p.data_pgto||'',obs:p.obs||''}});
-    
-    // Pull documentos
-    var dr=await fetch(SB_URL+'/rest/v1/documentos?user_id=eq.'+userId+'&select=*',{headers:sbHeaders(token)});
-    var docs=await dr.json();
-    var localDocs=docs.map(function(d){return{id:d.local_id||uid(),pacienteId:pacMap[d.paciente_id]||'',titulo:d.titulo,tipo:d.tipo||'',corpo:d.corpo||'',createdAt:d.created_at||''}});
-    
-    // Pull testes
-    var tr=await fetch(SB_URL+'/rest/v1/testes?user_id=eq.'+userId+'&select=*',{headers:sbHeaders(token)});
-    var tsts=await tr.json();
-    var localTsts=tsts.map(function(t){return{id:t.local_id||uid(),pacienteId:pacMap[t.paciente_id]||'',testeNome:t.teste_nome,data:t.data,score:t.score,nivel:t.nivel||'',cor:t.cor||'',desc:t.descr||'',
-      perfil:t.perfil?(typeof t.perfil==='string'?JSON.parse(t.perfil):t.perfil):null,
-      respostas:t.respostas?(typeof t.respostas==='string'?JSON.parse(t.respostas):t.respostas):null}});
-    
-    var msg='Backup na nuvem: '+localPacs.length+' pacientes, '+localSess.length+' sessões, '+localPags.length+' pagamentos\n\nRestaurar? (Substituirá TODOS os dados locais)';
-    if(!confirm(msg)){syncStatus='idle';syncMsg='';updateSyncUI();return false}
-    
-    D={pacientes:localPacs,sessoes:localSess,pagamentos:localPags,documentos:localDocs,testes:localTsts};
+    var file=await gdFindFile(token);
+    if(!file){syncStatus='error';syncMsg='Nenhum backup encontrado no Google Drive.';updateSyncUI();toast('Nenhum backup encontrado.');return}
+    var r=await fetch('https://www.googleapis.com/drive/v3/files/'+file.id+'?alt=media',{
+      headers:{'Authorization':'Bearer '+token}});
+    if(!r.ok)throw new Error('Download falhou: '+r.status);
+    var data=await r.json();
+    if(!data.pacientes){throw new Error('Arquivo de backup inválido.')}
+    var msg='Backup do Google Drive:\n'+data.pacientes.length+' pacientes\n'+(data.sessoes||[]).length+' sessões\n'+(data.pagamentos||[]).length+' pagamentos\n\nModificado: '+new Date(file.modifiedTime).toLocaleString('pt-BR')+'\n\nRestaurar? (Substituirá TODOS os dados locais)';
+    if(!confirm(msg)){syncStatus='idle';syncMsg='';updateSyncUI();return}
+    D={pacientes:data.pacientes||[],sessoes:data.sessoes||[],pagamentos:data.pagamentos||[],documentos:data.documentos||[],testes:data.testes||[],evolucoes:data.evolucoes||[],config:data.config||{}};
     syncPayments();save();
     localStorage.setItem('clinica_last_sync',new Date().toISOString());
-    syncStatus='success';syncMsg='Dados restaurados da nuvem';
-    updateSyncUI();renderApp();toast('Dados restaurados da nuvem!');return true;
+    syncStatus='success';syncMsg='Dados restaurados do Google Drive';
+    updateSyncUI();renderApp();toast('Dados restaurados!');
   }catch(e){
-    syncStatus='error';syncMsg='Erro: '+e.message;updateSyncUI();return false;
+    if(e.message&&e.message.indexOf('401')>=0){localStorage.removeItem('gd_token');localStorage.removeItem('gd_token_exp');syncMsg='Sessão expirada. Reconecte.'}
+    else{syncMsg='Erro: '+e.message}
+    syncStatus='error';updateSyncUI();
   }
 }
 
@@ -3365,203 +3447,888 @@ function updateSyncUI(){
   else if(syncStatus==='error'){dot='background:#dc2626';txt=syncMsg}
   else{var ls=localStorage.getItem('clinica_last_sync');txt=ls?'Último sync: '+new Date(ls).toLocaleString('pt-BR'):'Nunca sincronizado';dot='background:#9ca3af'}
   el.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:10px 0"><div style="width:8px;height:8px;border-radius:50%;flex-shrink:0;'+dot+'"></div><div style="font-size:12px;color:var(--textMuted)">'+txt+'</div></div>';
+  updateSyncIndicator();
 }
 
 function openCloudAuth(){
-  var auth=sbAuth();
-  if(auth&&auth.access_token){
-    var email=auth.user?auth.user.email:'';
-    showModal('<div class="modal-header"><h2>Nuvem Concordia</h2><button class="close" onclick="hideModal()">&times;</button></div>'+
-    '<div style="text-align:center;padding:16px 0"><div style="width:48px;height:48px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 12px">☁</div>'+
-    '<div style="font-weight:600;font-size:15px">Conectado</div>'+
-    '<div style="font-size:13px;color:var(--textMuted);margin-top:4px">'+email+'</div></div>'+
+  var token=gdAuth();
+  if(token){
+    showModal('<div class="modal-header"><h2>Google Drive</h2><button class="close" onclick="hideModal()">&times;</button></div>'+
+    '<div style="text-align:center;padding:16px 0"><div style="width:48px;height:48px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 12px">\u2601</div>'+
+    '<div style="font-weight:600;font-size:15px">Conectado ao Google Drive</div>'+
+    '<div style="font-size:13px;color:var(--textMuted);margin-top:4px">Token ativo</div></div>'+
     '<div style="display:flex;flex-direction:column;gap:10px;margin-top:16px">'+
-    '<button class="btn btn-p" onclick="hideModal();sbPush().then(function(){renderApp()})">Enviar para Nuvem</button>'+
-    '<button class="btn btn-o" onclick="hideModal();sbPull().then(function(){renderApp()})">Restaurar da Nuvem</button>'+
-    '<button class="btn btn-g" onclick="sbLogout();hideModal()" style="color:var(--danger);margin-top:8px">Desconectar</button></div>');
+    '<button class="btn btn-p" onclick="hideModal();gdPush()">Enviar para Drive</button>'+
+    '<button class="btn btn-o" onclick="hideModal();gdPull()">Restaurar do Drive</button>'+
+    '<button class="btn btn-g" onclick="gdDisconnect();hideModal()" style="color:var(--danger);margin-top:8px">Desconectar</button></div>');
     return;
   }
-  showModal('<div class="modal-header"><h2>Nuvem Concordia</h2><button class="close" onclick="hideModal()">&times;</button></div>'+
-  '<p style="font-size:13px;color:var(--textMuted);margin-bottom:16px">Faça backup dos seus dados na nuvem. Acesse de qualquer dispositivo.</p>'+
-  '<div id="cloudAuthTabs" style="display:flex;gap:0;border-bottom:1.5px solid var(--border);margin-bottom:16px">'+
-  '<div class="ptab active" onclick="switchCloudTab(\'login\')" data-ct="login">Entrar</div>'+
-  '<div class="ptab" onclick="switchCloudTab(\'signup\')" data-ct="signup">Criar Conta</div></div>'+
-  '<div id="cloudLogin"><div class="field"><label>Email</label><input type="email" id="sbEmail"></div>'+
-  '<div class="field"><label>Senha</label><input type="password" id="sbPass"></div>'+
-  '<div id="sbMsg" style="font-size:12px;margin:8px 0;min-height:20px"></div>'+
-  '<button class="btn btn-p" style="width:100%" onclick="doSbLogin()">Entrar</button></div>'+
-  '<div id="cloudSignup" style="display:none"><div class="field"><label>Email</label><input type="email" id="sbEmail2"></div>'+
-  '<div class="field"><label>Senha (mín. 6 caracteres)</label><input type="password" id="sbPass2"></div>'+
-  '<div id="sbMsg2" style="font-size:12px;margin:8px 0;min-height:20px"></div>'+
-  '<button class="btn btn-p" style="width:100%" onclick="doSbSignup()">Criar Conta</button></div>');
-}
-
-function switchCloudTab(tab){
-  document.querySelectorAll('#cloudAuthTabs .ptab').forEach(function(t){t.classList.toggle('active',t.dataset.ct===tab)});
-  document.getElementById('cloudLogin').style.display=tab==='login'?'block':'none';
-  document.getElementById('cloudSignup').style.display=tab==='signup'?'block':'none';
-}
-
-async function doSbLogin(){
-  var email=document.getElementById('sbEmail').value.trim();
-  var pass=document.getElementById('sbPass').value;
-  if(!email||!pass){document.getElementById('sbMsg').innerHTML='<span style="color:var(--danger)">Preencha email e senha</span>';return}
-  document.getElementById('sbMsg').innerHTML='<span style="color:var(--textMuted)">Conectando...</span>';
-  var r=await sbLogin(email,pass);
-  if(r.ok){hideModal();toast('Conectado à nuvem!');renderApp()}
-  else{document.getElementById('sbMsg').innerHTML='<span style="color:var(--danger)">'+r.msg+'</span>'}
-}
-
-async function doSbSignup(){
-  var email=document.getElementById('sbEmail2').value.trim();
-  var pass=document.getElementById('sbPass2').value;
-  if(!email||!pass){document.getElementById('sbMsg2').innerHTML='<span style="color:var(--danger)">Preencha email e senha</span>';return}
-  if(pass.length<6){document.getElementById('sbMsg2').innerHTML='<span style="color:var(--danger)">Senha precisa ter no mínimo 6 caracteres</span>';return}
-  document.getElementById('sbMsg2').innerHTML='<span style="color:var(--textMuted)">Criando conta...</span>';
-  var r=await sbSignup(email,pass,PROF.nome,PROF.crp);
-  if(r.ok){hideModal();toast(r.msg);renderApp()}
-  else{document.getElementById('sbMsg2').innerHTML='<span style="color:var(--danger)">'+r.msg+'</span>'}
+  showModal('<div class="modal-header"><h2>Google Drive</h2><button class="close" onclick="hideModal()">&times;</button></div>'+
+  '<div style="text-align:center;padding:20px 0"><div style="font-size:48px;margin-bottom:12px">\u2601\ufe0f</div>'+
+  '<p style="font-size:14px;color:var(--text);font-weight:500;margin-bottom:8px">Conecte seu Google Drive</p>'+
+  '<p style="font-size:13px;color:var(--textMuted);margin-bottom:24px;line-height:1.5">Seus dados serão salvos como um arquivo JSON no seu Google Drive pessoal. Nenhum servidor intermediário.</p>'+
+  '<button class="btn btn-p" style="width:100%;padding:14px;font-size:15px" onclick="hideModal();gdConnect()">\ud83d\udd12 Conectar com Google</button></div>');
 }
 
 
 
-// === CALENDAR DEDUP ===
-function calCleanDuplicates(){
-  if(!window.Android||!Android.readCalendarEvents||!Android.hasCalendarPermission())return;
-  try{
-    var now=new Date();
-    var start=new Date(now);start.setDate(start.getDate()-60);
-    var end=new Date(now);end.setDate(end.getDate()+400);
-    var json=Android.readCalendarEvents(start.toISOString().split('T')[0],end.toISOString().split('T')[0]);
-    if(!json)return;
-    var calEvents=JSON.parse(json);
-    
-    // Group events by date+hora — duplicates have same date+time
-    var groups={};
-    calEvents.forEach(function(e){
-      // Only look at Clínica Fácil events (title starts with "Sessão")
-      if(!(e.title||'').startsWith('Sessão')&&!(e.title||'').startsWith('Sessao'))return;
-      var key=e.date+'_'+e.hora;
-      if(!groups[key])groups[key]=[];
-      groups[key].push(e);
-    });
-    
-    var toDelete=[];
-    Object.keys(groups).forEach(function(key){
-      var evts=groups[key];
-      if(evts.length<=1)return;
-      // Keep the one with the longest title (most complete), delete rest
-      evts.sort(function(a,b){return(b.title||'').length-(a.title||'').length});
-      // Keep first (longest title), mark rest for deletion
-      for(var i=1;i<evts.length;i++){
-        toDelete.push(evts[i]);
+
+
+
+
+// === AUTO-SYNC (debounced) ===
+var _autoSyncTimer=null;
+function scheduleAutoSync(){
+  if(!gdAuth())return;
+  clearTimeout(_autoSyncTimer);
+  _autoSyncTimer=setTimeout(function(){
+    gdPush().catch(function(e){console.log('Auto-sync failed:',e)});
+  },30000); // 30s after last save
+}
+// Sync indicator in topbar
+function updateSyncIndicator(){
+  var el=document.getElementById('syncDot');if(!el)return;
+  var t=gdAuth();
+  if(!t){el.style.display='none';return}
+  el.style.display='inline-block';
+  if(syncStatus==='syncing'){el.style.background='#f59e0b';el.title='Sincronizando...'}
+  else if(syncStatus==='success'){el.style.background='#16a34a';el.title='Sincronizado'}
+  else if(syncStatus==='error'){el.style.background='#dc2626';el.title=syncMsg}
+  else{el.style.background='#9ca3af';el.title='Google Drive conectado'}
+}
+
+
+// === #3: Toggle ativo/inativo ===
+function toggleAtivoPac(){
+  if(!editId)return;
+  var p=D.pacientes.find(function(x){return x.id===editId});
+  if(!p)return;
+  var newState=p.ativo===false?true:false;
+  var msg=newState?'Reativar este paciente?':'Inativar este paciente? (Dados serão preservados)';
+  if(!confirm(msg))return;
+  p.ativo=newState;save();hideModal();renderApp();
+  toast(newState?'Paciente reativado':'Paciente inativado');
+}
+function toggleAtivo(pacId){
+  var p=D.pacientes.find(function(x){return x.id===pacId});
+  if(!p)return;
+  var newState=p.ativo===false?true:false;
+  p.ativo=newState;save();renderApp();
+  toast(p.nome+': '+(newState?'reativado':'inativado'));
+}
+
+// === #5: Quick-add session pre-filled ===
+function quickAddSession(pacId){
+  if(!D.evolucoes)D.evolucoes=[];
+  var pac=D.pacientes.find(function(p){return p.id===pacId});
+  if(!pac)return;
+  var now=new Date();
+  evoTagSel=[];window._evoTranscricao=null;window._evoArquivos=[];
+  showModal(
+    '<div class="modal-header"><h2>Sessão — '+pac.nome+'</h2><button class="close" onclick="hideModal()">&times;</button></div>'+
+    '<input type="hidden" id="sessPac" value="'+pacId+'">'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px"><div class="field"><label>Data</label><input type="date" id="evoData" value="'+today()+'"></div><div class="field"><label>Hora</label><input type="time" id="evoHora" value="'+pad(now.getHours())+':'+pad(now.getMinutes())+'"></div></div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px"><div class="field"><label>Humor (1-10)</label><div style="display:flex;align-items:center;gap:8px"><input type="range" id="evoHumor" min="0" max="10" value="0" style="flex:1" oninput="document.getElementById(\'humorVal\').textContent=this.value==0?\'-\':this.value"><span id="humorVal" style="font-weight:700;min-width:20px;text-align:center">-</span></div></div><div class="field"><label>Ansiedade (1-10)</label><div style="display:flex;align-items:center;gap:8px"><input type="range" id="evoAns" min="0" max="10" value="0" style="flex:1" oninput="document.getElementById(\'ansVal\').textContent=this.value==0?\'-\':this.value"><span id="ansVal" style="font-weight:700;min-width:20px;text-align:center">-</span></div></div></div>'+
+    '<div style="margin-bottom:14px"><label style="font-size:11.5px;font-weight:700;color:var(--textLight);margin-bottom:8px;display:block;letter-spacing:.06em;text-transform:uppercase">Formato</label><div style="display:flex;gap:8px;margin-bottom:10px"><button class="btn btn-p btn-s" onclick="toggleEvoFmt(true)">SOAP</button><button class="btn btn-o btn-s" onclick="toggleEvoFmt(false)">Livre</button></div></div>'+
+    '<div id="evoFmtArea">'+evoSOAP({})+'</div>'+
+    '<div style="margin-bottom:14px"><label style="font-size:11.5px;font-weight:700;color:var(--textLight);margin-bottom:8px;display:block;letter-spacing:.06em;text-transform:uppercase">Intervenções</label><div id="evoTagArea" style="display:flex;flex-wrap:wrap;gap:6px">'+EVOL_TAGS.map(function(t){return'<button class="btn btn-s btn-o" style="font-size:11px;padding:4px 10px" onclick="toggleEvoTag(this,\''+t.replace(/'/g,"\\'")+'\')">'+t+'</button>'}).join('')+'</div></div>'+
+    '<div style="text-align:right;margin-top:16px"><button class="btn btn-p" onclick="saveSessionGlobal()">Salvar Sessão</button></div>'
+  );
+}
+
+// === #6: Prontuários search across all patients ===
+var pronSearch='';
+
+// === #11: Treatment plan tab ===
+function renderPlanoTab(p){
+  var plano=p.plano||{};
+  return '<div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="font-size:16px;font-weight:600">Plano Terapêutico</h3><button class="btn btn-p btn-s" onclick="editPlano(\''+p.id+'\')">Editar</button></div>'+
+  '<div class="card" style="padding:16px;margin-bottom:12px"><div class="stat-label" style="margin-bottom:8px">Objetivos</div><div style="font-size:13px;line-height:1.7;white-space:pre-wrap;color:var(--text)">'+(plano.objetivos||'<span style="color:var(--textLight)">Nenhum objetivo definido.</span>')+'</div></div>'+
+  '<div class="card" style="padding:16px;margin-bottom:12px"><div class="stat-label" style="margin-bottom:8px">Intervenções</div><div style="font-size:13px;line-height:1.7;white-space:pre-wrap;color:var(--text)">'+(plano.intervencoes||'<span style="color:var(--textLight)">Nenhuma intervenção definida.</span>')+'</div></div>'+
+  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div class="card" style="padding:16px"><div class="stat-label" style="margin-bottom:8px">Duração estimada</div><div style="font-size:14px;font-weight:600">'+(plano.duracao||'—')+'</div></div><div class="card" style="padding:16px"><div class="stat-label" style="margin-bottom:8px">Revisão</div><div style="font-size:14px;font-weight:600">'+(plano.revisao?fmtD(plano.revisao):'—')+'</div></div></div></div>';
+}
+function editPlano(pacId){
+  var p=D.pacientes.find(function(x){return x.id===pacId});if(!p)return;
+  var pl=p.plano||{};
+  showModal('<div class="modal-header"><h2>Plano Terapêutico</h2><button class="close" onclick="hideModal()">&times;</button></div>'+
+  '<div class="field"><label>Objetivos (um por linha)</label><textarea id="plObjetivos" rows="5" placeholder="1. Reduzir sintomas de ansiedade\n2. Melhorar habilidades de enfrentamento\n3. ...">'+(pl.objetivos||'')+'</textarea></div>'+
+  '<div class="field"><label>Intervenções</label><textarea id="plIntervencoes" rows="4" placeholder="TCC, exposição gradual, reestruturação cognitiva...">'+(pl.intervencoes||'')+'</textarea></div>'+
+  '<div class="grid2"><div class="field"><label>Duração estimada</label><input type="text" id="plDuracao" placeholder="Ex: 20 sessões, 6 meses..." value="'+(pl.duracao||'')+'"></div>'+
+  '<div class="field"><label>Data de revisão</label><input type="date" id="plRevisao" value="'+(pl.revisao||'')+'"></div></div>'+
+  '<div style="text-align:right;margin-top:16px"><button class="btn btn-p" onclick="savePlano(\''+pacId+'\')">Salvar</button></div>');
+}
+function savePlano(pacId){
+  var p=D.pacientes.find(function(x){return x.id===pacId});if(!p)return;
+  p.plano={
+    objetivos:document.getElementById('plObjetivos').value.trim(),
+    intervencoes:document.getElementById('plIntervencoes').value.trim(),
+    duracao:document.getElementById('plDuracao').value.trim(),
+    revisao:document.getElementById('plRevisao').value
+  };
+  save();hideModal();renderApp();toast('Plano salvo');
+}
+
+// === #13: Mood trend alert ===
+function getMoodAlert(pacId){
+  var notes=(D.evolucoes||[]).filter(function(e){return e.pacienteId===pacId&&e.humor>0}).sort(function(a,b){return b.data.localeCompare(a.data)}).slice(0,5);
+  if(notes.length<3)return'';
+  // Check for declining mood over last 3 sessions
+  var last3=notes.slice(0,3);
+  var declining=true;
+  for(var i=0;i<last3.length-1;i++){if(last3[i].humor>=last3[i+1].humor){declining=false;break}}
+  if(declining&&last3[0].humor<=last3[last3.length-1].humor-2){
+    return'<div style="padding:10px 14px;background:#FEF2F2;border:1px solid #FECACA;border-radius:var(--radiusSm);margin-bottom:12px;font-size:12px;color:#DC2626;display:flex;align-items:center;gap:8px"><span style="font-size:16px">⚠</span> Tendência descendente de humor nas últimas '+last3.length+' sessões ('+last3.map(function(n){return n.humor}).reverse().join(' → ')+')</div>';
+  }
+  // Check for high anxiety trend
+  var anxNotes=notes.filter(function(n){return n.ansiedade>0}).slice(0,3);
+  if(anxNotes.length>=3){
+    var avgAnx=anxNotes.reduce(function(a,n){return a+n.ansiedade},0)/anxNotes.length;
+    if(avgAnx>=7){
+      return'<div style="padding:10px 14px;background:#FFF7ED;border:1px solid #FED7AA;border-radius:var(--radiusSm);margin-bottom:12px;font-size:12px;color:#C2410C;display:flex;align-items:center;gap:8px"><span style="font-size:16px">⚠</span> Ansiedade média elevada nas últimas sessões ('+avgAnx.toFixed(1)+'/10)</div>';
+    }
+  }
+  return'';
+}
+
+// === #14: PDF export for evolução ===
+function exportEvolPDF(pacId){
+  var pac=D.pacientes.find(function(p){return p.id===pacId});if(!pac)return;
+  var notas=(D.evolucoes||[]).filter(function(e){return e.pacienteId===pacId}).sort(function(a,b){return a.data.localeCompare(b.data)});
+  if(!notas.length){toast('Nenhuma evolução para exportar');return}
+  var html='<html><head><meta charset="UTF-8"><title>Evolução - '+pac.nome+'</title><style>body{font-family:Arial,sans-serif;padding:40px;font-size:12px;color:#333;max-width:800px;margin:0 auto}h1{font-size:18px;border-bottom:2px solid #333;padding-bottom:8px}h2{font-size:14px;margin-top:24px;color:#555}.session{border:1px solid #ddd;border-radius:8px;padding:16px;margin-bottom:16px;page-break-inside:avoid}.meta{color:#888;font-size:11px;margin-bottom:8px}.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:bold;margin-right:4px}.tags{margin-top:8px}.tag{display:inline-block;background:#f0f0f0;padding:2px 8px;border-radius:10px;font-size:10px;margin:2px}@media print{body{padding:20px}.session{border:1px solid #ccc}}</style></head><body>';
+  html+='<h1>Evolução Clínica — '+pac.nome+'</h1>';
+  html+='<p style="color:#888">CIDs: '+(pac.cids||[]).map(function(c){return c.code+' '+c.name}).join(', ')+'</p>';
+  html+='<p style="color:#888">Gerado em: '+new Date().toLocaleDateString("pt-BR")+'</p>';
+  html+='<p style="color:#888">Total: '+notas.length+' sessões</p>';
+  notas.forEach(function(n,i){
+    html+='<div class="session"><div class="meta">Sessão #'+(i+1)+' — '+fmtD(n.data)+' às '+n.hora;
+    if(n.humor)html+=' | Humor: '+n.humor+'/10';
+    if(n.ansiedade)html+=' | Ansiedade: '+n.ansiedade+'/10';
+    html+='</div>';
+    if(n.soap){
+      if(n.soap.s)html+='<p><strong>S (Subjetivo):</strong> '+n.soap.s+'</p>';
+      if(n.soap.o)html+='<p><strong>O (Objetivo):</strong> '+n.soap.o+'</p>';
+      if(n.soap.a)html+='<p><strong>A (Avaliação):</strong> '+n.soap.a+'</p>';
+      if(n.soap.p)html+='<p><strong>P (Plano):</strong> '+n.soap.p+'</p>';
+    }else if(n.texto){html+='<p>'+n.texto+'</p>'}
+    if(n.tags&&n.tags.length){html+='<div class="tags">'+n.tags.map(function(t){return'<span class="tag">'+t+'</span>'}).join('')+'</div>'}
+    html+='</div>';
+  });
+  html+='<div style="margin-top:40px;border-top:1px solid #ccc;padding-top:16px;text-align:center;color:#888;font-size:11px">'+PROF.nome+' — CRP: '+PROF.crp+'</div>';
+  html+='</body></html>';
+  var w=window.open('','_blank');
+  if(w){w.document.write(html);w.document.close();setTimeout(function(){w.print()},500)}
+  else{var b=new Blob([html],{type:'text/html'});var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='evolucao_'+pac.nome.replace(/\s+/g,'_')+'.html';a.click();toast('Arquivo HTML gerado — abra e imprima como PDF')}
+}
+
+// === #7: Recurring session templates ===
+function openRecorrencia(pacId){
+  var pac=D.pacientes.find(function(p){return p.id===pacId});if(!pac)return;
+  var rec=pac.recorrencia||{};
+  showModal('<div class="modal-header"><h2>Recorrência — '+pac.nome+'</h2><button class="close" onclick="hideModal()">&times;</button></div>'+
+  '<p style="font-size:13px;color:var(--textMuted);margin-bottom:16px">Gere sessões automaticamente para as próximas semanas.</p>'+
+  '<div class="grid2"><div class="field"><label>Dia da semana</label><select id="recDia"><option value="1"'+(rec.dia==1?' selected':'')+'>Segunda</option><option value="2"'+(rec.dia==2?' selected':'')+'>Terça</option><option value="3"'+(rec.dia==3?' selected':'')+'>Quarta</option><option value="4"'+(rec.dia==4?' selected':'')+'>Quinta</option><option value="5"'+(rec.dia==5?' selected':'')+'>Sexta</option><option value="6"'+(rec.dia==6?' selected':'')+'>Sábado</option></select></div>'+
+  '<div class="field"><label>Horário</label><input type="time" id="recHora" value="'+(rec.hora||'09:00')+'"></div></div>'+
+  '<div class="grid2"><div class="field"><label>Frequência</label><select id="recFreq"><option value="1"'+(rec.freq==1?' selected':'')+'>Semanal</option><option value="2"'+(rec.freq==2?' selected':'')+'>Quinzenal</option></select></div>'+
+  '<div class="field"><label>Gerar para (semanas)</label><input type="number" id="recSemanas" value="'+(rec.semanas||4)+'" min="1" max="12"></div></div>'+
+  '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:16px"><button class="btn btn-o" onclick="hideModal()">Cancelar</button><button class="btn btn-p" onclick="gerarRecorrencia(\''+pacId+'\')">Gerar Sessões</button></div>');
+}
+function gerarRecorrencia(pacId){
+  var dia=parseInt(document.getElementById('recDia').value);
+  var hora=document.getElementById('recHora').value;
+  var freq=parseInt(document.getElementById('recFreq').value);
+  var semanas=parseInt(document.getElementById('recSemanas').value)||4;
+  var pac=D.pacientes.find(function(p){return p.id===pacId});
+  if(!pac)return;
+  // Save template
+  pac.recorrencia={dia:dia,hora:hora,freq:freq,semanas:semanas};
+  // Generate sessions
+  var d=new Date();
+  // Find next occurrence of target day
+  while(d.getDay()!==dia)d.setDate(d.getDate()+1);
+  var count=0;
+  for(var w=0;w<semanas;w++){
+    var ds=d.toISOString().split('T')[0];
+    var exists=D.sessoes.some(function(s){return s.pacienteId===pacId&&s.data===ds&&s.hora===hora});
+    if(!exists){
+      D.sessoes.push({id:uid(),pacienteId:pacId,data:ds,hora:hora,obs:''});
+      count++;
+    }
+    d.setDate(d.getDate()+(7*freq));
+  }
+  syncPayments();save();hideModal();renderApp();
+  toast(count+' sessões geradas para '+pac.nome);
+}
+
+
+// === AI CLINICAL ANALYSIS ENGINE ===
+var AI_SYSTEM_PROMPT=`Você é um analista clínico especializado em Análise do Comportamento (Behaviorismo Radical) e Teoria das Molduras Relacionais (RFT).
+
+Seu papel é analisar transcrições de sessões terapêuticas e produzir análises clínicas estruturadas. Você NÃO é o terapeuta — você é um co-piloto analítico que identifica padrões comportamentais, contingências e molduras relacionais.
+
+## Diretrizes fundamentais:
+- Fundamente CADA afirmação em dados observáveis da transcrição
+- Use linguagem técnica precisa em português brasileiro
+- Diferencie dados (observado) de inferências (interpretações)
+- Mantenha análise funcional — NUNCA faça julgamentos morais
+- Especificidade: não diga "o paciente apresenta dificuldades emocionais", diga "o paciente relata reatividade emocional em contextos de confronto, respondendo antes de processar a informação"
+
+## Estrutura de análise por sessão:
+
+### 1. COMPORTAMENTOS-ALVO
+Para cada comportamento relevante: topografia, função, antecedentes, consequências
+
+### 2. CONTINGÊNCIAS
+- Contingências de reforçamento social
+- Padrões de esquiva experiencial e reforço negativo
+- Controle verbal (regras auto-geradas, compliance, tracking)
+- Establishing/motivating operations
+
+### 3. ANÁLISE RFT
+- Molduras de avaliação (MELHOR QUE / PIOR QUE)
+- Molduras de identidade (EU SOU) — fusão cognitiva
+- Molduras temporais (ANTES / DEPOIS) — ruminação, preocupação
+- Molduras causais (SE... ENTÃO) — regras rígidas vs flexíveis
+- Transformação de função via linguagem
+- Coerência relacional vs flexibilidade
+
+### 4. SUGESTÕES DE INTERVENÇÃO
+Para cada sugestão: o que fazer, por que (justificativa funcional), como monitorar
+
+### 5. REFLEXÃO SOBRE O PROCESSO TERAPÊUTICO
+- O que funcionou na sessão (em termos funcionais)
+- Oportunidades perdidas
+- Riscos de reforçamento inadvertido
+
+Responda SEMPRE em português brasileiro. Seja conciso mas preciso.`;
+
+var AI_SESSION_PROMPT=`Analise esta sessão terapêutica. Produza uma análise funcional concisa (máximo 800 palavras) com:
+1. Comportamentos-alvo identificados (com ABC)
+2. Contingências principais
+3. Molduras relacionais (RFT) mais salientes
+4. Uma sugestão de intervenção prioritária
+5. Uma observação sobre o processo terapêutico
+
+PRONTUÁRIO ATUAL DO PACIENTE:
+- Queixas registradas: {EXISTING_QUEIXAS}
+- CIDs registrados: {EXISTING_CIDS}
+- Medicações registradas: {EXISTING_MEDS}
+
+Contexto do paciente:
+{PATIENT_CONTEXT}
+
+Transcrição/notas da sessão:
+{SESSION_CONTENT}
+
+IMPORTANTE: Ao final da sua análise, se o paciente revelou informações clínicas NOVAS que NÃO constam no prontuário acima (queixas, diagnósticos, medicações), adicione um bloco separado EXATAMENTE neste formato:
+
+[PRONTUARIO_UPDATE]
+{"queixas":"texto das queixas novas ou vazio","cids":[{"code":"F41.1","name":"Ansiedade generalizada"}],"meds":[{"name":"Sertralina","dose":"50","unit":"mg"}]}
+[/PRONTUARIO_UPDATE]
+
+Se NÃO houver informações novas para o prontuário, NÃO inclua este bloco.`;
+
+var AI_CHAT_PROMPT=`Você está analisando o caso clínico de {PATIENT_NAME}.
+
+Dados do paciente:
+{PATIENT_CONTEXT}
+
+Histórico de sessões (resumos):
+{SESSION_HISTORY}
+
+O terapeuta vai fazer perguntas clínicas sobre este paciente. Responda usando as lentes do Behaviorismo Radical e RFT. Seja específico, cite dados das sessões quando relevante. Máximo 500 palavras por resposta.`;
+
+function getApiKey(){return localStorage.getItem('cf_api_key')||''}
+
+function buildPatientContext(p){
+  var ctx='Nome: '+p.nome+'\n';
+  if(p.cids&&p.cids.length)ctx+='CIDs: '+(p.cids||[]).map(function(c){return c.code+' '+c.name}).join(', ')+'\n';
+  if(p.meds&&p.meds.length)ctx+='Medicações: '+(p.meds||[]).map(function(m){return m.name+(m.dose?' '+m.dose+(m.unit||''):'')}).join(', ')+'\n';
+  if(p.queixas)ctx+='Queixas: '+p.queixas+'\n';
+  if(p.plano&&p.plano.objetivos)ctx+='Objetivos terapêuticos: '+p.plano.objetivos+'\n';
+  return ctx;
+}
+
+function buildSessionContent(n){
+  var content='Data: '+fmtD(n.data)+' '+n.hora+'\n';
+  if(n.humor)content+='Humor: '+n.humor+'/10\n';
+  if(n.ansiedade)content+='Ansiedade: '+n.ansiedade+'/10\n';
+  if(n.tags&&n.tags.length)content+='Intervenções: '+n.tags.join(', ')+'\n';
+  if(n.soap){
+    if(n.soap.s)content+='\nSUBJETIVO:\n'+n.soap.s;
+    if(n.soap.o)content+='\nOBJETIVO:\n'+n.soap.o;
+    if(n.soap.a)content+='\nAVALIAÇÃO:\n'+n.soap.a;
+    if(n.soap.p)content+='\nPLANO:\n'+n.soap.p;
+  }else if(n.texto){
+    content+='\nNOTAS:\n'+n.texto;
+  }
+  if(n.transcricao){
+    content+='\nTRANSCRIÇÃO:\n'+n.transcricao.substring(0,6000);
+  }else if(n.arquivos&&n.arquivos.length){
+    // Try to extract text from attached files
+    n.arquivos.forEach(function(a){
+      if(a.data&&(a.type==='text/plain'||a.name.match(/\.(txt|srt|vtt|md)$/i))){
+        try{
+          var txt=a.data;
+          if(txt.startsWith('data:')||txt.indexOf(';base64,')>=0){txt=atob(txt.split(',').pop()||txt)}
+          content+='\nTRANSCRIÇÃO (de '+a.name+'):\n'+txt.substring(0,6000);
+        }catch(e){content+='\nTRANSCRIÇÃO (de '+a.name+'):\n'+a.data.substring(0,6000)}
       }
     });
-    
-    if(!toDelete.length){toast('Nenhum evento duplicado encontrado');return}
-    
-    if(!confirm('Encontrei '+toDelete.length+' evento(s) duplicado(s) no Google Calendar.\n\nRemover duplicatas? (Mantém o evento com nome mais completo)'))return;
-    
-    var removed=0;
-    toDelete.forEach(function(e){
+    if(content.indexOf('TRANSCRIÇÃO')<0){
+      content+='\nARQUIVOS ANEXADOS: '+n.arquivos.map(function(a){return a.name+' ('+Math.round(a.size/1024)+'KB)'}).join(', ')+'\nNOTA: Os arquivos PDF anexados não foram convertidos em texto. Para que a IA analise a transcrição, use o campo "Transcrição" ao editar a sessão e faça upload do PDF por lá.';
+    }
+  }
+  return content;
+}
+
+var AI_PROXY_URL='https://cf-ai-proxy.andrefiker-com-br.workers.dev';
+
+function xhrPost(url,headers,body){
+  return new Promise(function(resolve,reject){
+    var xhr=new XMLHttpRequest();
+    xhr.open('POST',url,true);
+    Object.keys(headers).forEach(function(k){xhr.setRequestHeader(k,headers[k])});
+    xhr.onload=function(){
+      if(xhr.status>=200&&xhr.status<300){
+        try{resolve(JSON.parse(xhr.responseText))}catch(e){reject(new Error('Parse error: '+xhr.responseText.substring(0,200)))}
+      }else{reject(new Error('API erro '+xhr.status+': '+xhr.responseText.substring(0,300)))}
+    };
+    xhr.onerror=function(){reject(new Error('Sem conexão — verifique sua internet'))};
+    xhr.ontimeout=function(){reject(new Error('Timeout — a análise demorou demais'))};
+    xhr.timeout=60000;
+    xhr.send(body);
+  });
+}
+
+async function callClaudeAPI(messages,systemPrompt,_retries){
+  _retries=_retries||0;
+  var key=getApiKey();
+  if(!key)throw new Error('Configure sua API Key em Configurações');
+  var payload=JSON.stringify({
+    model:'claude-sonnet-4-20250514',
+    max_tokens:2000,
+    system:systemPrompt,
+    messages:messages
+  });
+  var headers={'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'};
+  
+  try{
+    var d=await xhrPost(AI_PROXY_URL,headers,payload);
+    return d.content.map(function(c){return c.text||''}).join('');
+  }catch(err){
+    // Rate limit — wait and retry up to 2 times
+    if(err.message&&err.message.indexOf('429')>=0&&_retries<2){
+      var wait=(_retries+1)*30;
+      toast('Rate limit — aguardando '+wait+'s...');
+      await new Promise(function(r){setTimeout(r,wait*1000)});
+      return callClaudeAPI(messages,systemPrompt,_retries+1);
+    }
+    // Try direct API as fallback
+    if(location.protocol==='https:'&&err.message&&err.message.indexOf('429')<0){
       try{
-        Android.deleteCalendarEvent(e.id);
-        removed++;
-      }catch(ex){}
+        headers['anthropic-dangerous-direct-browser-access']='true';
+        var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:headers,body:payload});
+        if(!r.ok){var e=await r.text();throw new Error(e)}
+        var d2=await r.json();
+        return d2.content.map(function(c){return c.text||''}).join('');
+      }catch(directErr){throw directErr}
+    }
+    throw err;
+  }
+}
+
+// === OPTION 2: Per-session auto-analysis ===
+
+// --- File text extraction (PDF, DOCX, TXT) ---
+async function extractFileText(arquivo){
+  if(!arquivo||!arquivo.data||!arquivo.name)return null;
+  var name=(arquivo.name||'').toLowerCase();
+  try{
+    var raw=arquivo.data;
+
+    // TXT/SRT/VTT/MD — may be stored as raw text (readAsText) or base64 (readAsDataURL)
+    if(name.match(/\.(txt|srt|vtt|md)$/)){
+      // If it doesn't look like base64/dataURL, it's already plain text
+      if(!raw.startsWith('data:')&&raw.indexOf(';base64,')<0){
+        return raw.length>10?raw:null;
+      }
+      // Otherwise decode from base64
+      var b64=raw.indexOf(',')>=0?raw.split(',').pop():raw;
+      try{return atob(b64)}catch(e){return raw}
+    }
+
+    // Binary files (PDF, DOCX) — always base64/dataURL
+    if(raw.indexOf(',')>=0)raw=raw.split(',').pop();
+    var binary=atob(raw);
+    var bytes=new Uint8Array(binary.length);
+    for(var i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
+
+    // PDF
+    if(name.endsWith('.pdf')){
+      if(typeof pdfjsLib==='undefined'){toast('pdf.js não carregou');return null}
+      pdfjsLib.GlobalWorkerOptions.workerSrc='';
+      var pdf=await pdfjsLib.getDocument({data:bytes.buffer,disableAutoFetch:true,disableStream:true}).promise;
+      var text='';
+      for(var pg=1;pg<=pdf.numPages;pg++){
+        var page=await pdf.getPage(pg);
+        var tc=await page.getTextContent();
+        tc.items.forEach(function(it){text+=(it.str||'');if(it.hasEOL)text+='\n'});
+        text+='\n';
+      }
+      text=text.replace(/\n{3,}/g,'\n\n').trim();
+      if(text.length<30){toast('PDF sem texto extraível');return null}
+      return text;
+    }
+
+    // DOCX
+    if(name.endsWith('.docx')){
+      if(typeof JSZip==='undefined'){toast('JSZip não carregou');return null}
+      var zip=await JSZip.loadAsync(bytes);
+      var xmlFile=zip.file('word/document.xml');
+      if(!xmlFile){toast('DOCX inválido');return null}
+      var xml=await xmlFile.async('string');
+      var text=xml.replace(/<w:br[^>]*\/?>/g,'\n').replace(/<\/w:p>/g,'\n').replace(/<[^>]+>/g,'')
+        .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'")
+        .replace(/&#x([0-9a-fA-F]+);/g,function(m,c){return String.fromCharCode(parseInt(c,16))})
+        .replace(/\n{3,}/g,'\n\n').trim();
+      if(text.length<30){toast('DOCX sem texto');return null}
+      return text;
+    }
+  }catch(e){
+    console.error('extractFileText error ('+name+'):',e);
+    toast('Erro ao extrair '+name+': '+e.message);
+  }
+  return null;
+}
+
+// --- Core analysis function ---
+async function aiAnalyzeSession(evoId){
+  var n=(D.evolucoes||[]).find(function(x){return x.id===evoId});
+  if(!n)return;
+  var p=D.pacientes.find(function(x){return x.id===n.pacienteId});
+  if(!p)return;
+
+  // Step 1: Extract text from attached files
+  var extractedText=null;
+  if(n.arquivos&&n.arquivos.length){
+    toast('Extraindo texto dos anexos...');
+    for(var i=0;i<n.arquivos.length;i++){
+      extractedText=await extractFileText(n.arquivos[i]);
+      if(extractedText){
+        toast('Extraído: '+Math.round(extractedText.length/1000)+'KB de '+n.arquivos[i].name);
+        break;
+      }
+    }
+  }
+
+  // Step 2: Build full session content
+  var sessionContent=buildSessionContent(n);
+  if(extractedText){
+    sessionContent+='\n\nTRANSCRIÇÃO COMPLETA DA SESSÃO:\n'+extractedText.substring(0,8000);
+  }
+
+  // Step 3: Single API call — analysis + prontuário extraction
+  toast('Analisando sessão com IA...');
+  var existingCids=(p.cids||[]).map(function(c){return c.code+' '+c.name}).join(', ')||'nenhum';
+  var existingMeds=(p.meds||[]).map(function(m){return m.name+(m.dose?' '+m.dose+(m.unit||''):'')}).join(', ')||'nenhum';
+  var existingQueixas=p.queixas||'nenhuma';
+
+  try{
+    var prompt=AI_SESSION_PROMPT
+      .replace('{PATIENT_CONTEXT}',buildPatientContext(p))
+      .replace('{SESSION_CONTENT}',sessionContent)
+      .replace('{EXISTING_QUEIXAS}',existingQueixas)
+      .replace('{EXISTING_CIDS}',existingCids)
+      .replace('{EXISTING_MEDS}',existingMeds);
+
+    var fullResult=await callClaudeAPI([{role:'user',content:prompt}],AI_SYSTEM_PROMPT);
+
+    // Step 4: Split analysis from prontuário JSON
+    var analysisText=fullResult;
+    var prontuarioData=null;
+    var pStart=fullResult.indexOf('[PRONTUARIO_UPDATE]');
+    var pEnd=fullResult.indexOf('[/PRONTUARIO_UPDATE]');
+    if(pStart>=0&&pEnd>pStart){
+      analysisText=fullResult.substring(0,pStart).trim();
+      var jsonStr=fullResult.substring(pStart+'[PRONTUARIO_UPDATE]'.length,pEnd).trim();
+      try{prontuarioData=JSON.parse(jsonStr)}catch(e){console.error('Prontuário JSON parse:',jsonStr)}
+    }
+
+    // Step 5: Save analysis
+    n.analiseIA={texto:analysisText,modelo:'claude-sonnet-4',data:new Date().toISOString()};
+    save();
+    if(!window._batchMode){toast('Análise IA concluída');renderApp()}
+
+    // Step 6: Show prontuário update modal if new data found
+    if(prontuarioData){
+      showProntuarioModal(p, prontuarioData);
+    }
+  }catch(e){
+    toast('Erro IA: '+e.message);
+    console.error('AI analysis error:',e);
+  }
+}
+
+// --- Prontuário update modal ---
+function showProntuarioModal(p, data){
+  // Skip modal during batch analysis — auto-apply instead
+  if(window._batchMode){
+    if(!data)return;
+    var changes=[];
+    if(data.queixas&&data.queixas.length>2){p.queixas=(p.queixas||'')+(p.queixas?'\n\n':'')+data.queixas;changes.push('queixas')}
+    if(data.cids&&data.cids.length){if(!p.cids)p.cids=[];data.cids.forEach(function(c){if(!p.cids.some(function(x){return x.code===c.code})){p.cids.push(c);changes.push(c.code)}})}
+    if(data.meds&&data.meds.length){if(!p.meds)p.meds=[];data.meds.forEach(function(m){if(!p.meds.some(function(x){return x.name.toLowerCase()===m.name.toLowerCase()})){p.meds.push({name:m.name,dose:m.dose||'',unit:m.unit||'mg'});changes.push(m.name)}})}
+    if(changes.length){save();console.log('Prontuário auto-atualizado: '+changes.join(', '))}
+    return;
+  }
+  var hasNew=false;
+  if(data.queixas&&data.queixas.length>2)hasNew=true;
+  if(data.cids&&data.cids.length)hasNew=true;
+  if(data.meds&&data.meds.length)hasNew=true;
+  if(!hasNew)return;
+
+  window._pendingProntuario={pacId:p.id,data:data};
+  var h='<div class="modal-header"><h2>📋 Atualizar Prontuário</h2><button class="close" onclick="hideModal()">&times;</button></div>';
+  h+='<p style="font-size:13px;color:var(--textMuted);margin-bottom:16px">A IA identificou informações novas na sessão de <strong>'+p.nome+'</strong>:</p>';
+
+  if(data.queixas&&data.queixas.length>2){
+    h+='<div style="margin-bottom:14px"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="pronQ" checked>';
+    h+='<span style="font-size:12px;font-weight:700;color:var(--textMuted);text-transform:uppercase;letter-spacing:.04em">Queixas</span></label>';
+    h+='<div style="font-size:13px;padding:10px 14px;background:var(--surfaceAlt);border-radius:10px;margin-top:6px;line-height:1.6">'+data.queixas.replace(/</g,'&lt;')+'</div></div>';
+  }
+  if(data.cids&&data.cids.length){
+    h+='<div style="margin-bottom:14px"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="pronC" checked>';
+    h+='<span style="font-size:12px;font-weight:700;color:var(--textMuted);text-transform:uppercase;letter-spacing:.04em">CIDs</span></label>';
+    h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">'+data.cids.map(function(c){return'<span class="badge" style="background:var(--accentLight);color:var(--accent);padding:4px 10px">'+c.code+' '+c.name+'</span>'}).join('')+'</div></div>';
+  }
+  if(data.meds&&data.meds.length){
+    h+='<div style="margin-bottom:14px"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="pronM" checked>';
+    h+='<span style="font-size:12px;font-weight:700;color:var(--textMuted);text-transform:uppercase;letter-spacing:.04em">Medicações</span></label>';
+    h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">'+data.meds.map(function(c){return'<span class="badge" style="background:#EEF8F0;color:#2F8A52;padding:4px 10px">'+c.name+(c.dose?' '+c.dose+(c.unit||'mg'):'')+'</span>'}).join('')+'</div></div>';
+  }
+  h+='<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px"><button class="btn btn-o" onclick="hideModal()">Ignorar</button><button class="btn btn-p" onclick="confirmProntuarioUpdate()">Atualizar Prontuário</button></div>';
+  showModal(h);
+}
+
+function confirmProntuarioUpdate(){
+  var pd=window._pendingProntuario;if(!pd)return;
+  var p=D.pacientes.find(function(x){return x.id===pd.pacId});if(!p)return;
+  var d=pd.data;var changes=[];
+
+  if(d.queixas&&d.queixas.length>2&&document.getElementById('pronQ')&&document.getElementById('pronQ').checked){
+    p.queixas=(p.queixas||'')+(p.queixas?'\n\n':'')+d.queixas;
+    changes.push('queixas');
+  }
+  if(d.cids&&d.cids.length&&document.getElementById('pronC')&&document.getElementById('pronC').checked){
+    if(!p.cids)p.cids=[];
+    d.cids.forEach(function(c){if(!p.cids.some(function(x){return x.code===c.code})){p.cids.push(c);changes.push(c.code)}});
+  }
+  if(d.meds&&d.meds.length&&document.getElementById('pronM')&&document.getElementById('pronM').checked){
+    if(!p.meds)p.meds=[];
+    d.meds.forEach(function(m){if(!p.meds.some(function(x){return x.name.toLowerCase()===m.name.toLowerCase()})){p.meds.push({name:m.name,dose:m.dose||'',unit:m.unit||'mg'});changes.push(m.name)}});
+  }
+
+  save();hideModal();window._pendingProntuario=null;
+  if(changes.length)toast('Prontuário atualizado: '+changes.join(', '));
+  renderApp();
+}
+
+// --- Clipboard & insert helpers ---
+function clipCopy(text){
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){toast('Copiado!')}).catch(function(){_fbCopy(text)})}
+  else{_fbCopy(text)}
+}
+function _fbCopy(text){var ta=document.createElement('textarea');ta.value=text;ta.style.cssText='position:fixed;left:-9999px';document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Copiado!')}
+function copyAIText(idx,pacId){var c=iaChats[pacId]||[];if(c[idx])clipCopy(cleanAIText(c[idx].content))}
+function copyAnalysis(evoId){var n=(D.evolucoes||[]).find(function(x){return x.id===evoId});if(n&&n.analiseIA)clipCopy(cleanAIText(n.analiseIA.texto))}
+function cleanAIText(raw){
+  // Convert markdown to clean readable text
+  var t=raw
+    .replace(/^#{1,4}\s*/gm,'')           // remove # headers
+    .replace(/\*\*([^*]+)\*\*/g,'$1')      // remove **bold**
+    .replace(/\*([^*]+)\*/g,'$1')          // remove *italic*
+    .replace(/^-\s+/gm,'• ')              // - bullets to •
+    .replace(/\n{3,}/g,'\n\n')            // collapse blank lines
+    .trim();
+  return t;
+}
+function formatAIHtml(raw){
+  // Convert markdown to styled HTML for display
+  var h=raw.replace(/</g,'&lt;');
+  // Headers → bold colored
+  h=h.replace(/^#{1,2}\s*\d*\.?\s*(.+)$/gm,'<div style="font-weight:700;color:var(--primary);margin-top:16px;margin-bottom:6px;font-size:13px;text-transform:uppercase;letter-spacing:.03em">$1</div>');
+  h=h.replace(/^#{3,4}\s*\d*\.?\s*(.+)$/gm,'<div style="font-weight:700;margin-top:12px;margin-bottom:4px;font-size:12.5px">$1</div>');
+  // Bold
+  h=h.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+  // Italic
+  h=h.replace(/\*([^*]+)\*/g,'<em>$1</em>');
+  // Bullets
+  h=h.replace(/^-\s+(.+)$/gm,'<div style="padding-left:16px;position:relative;margin:3px 0"><span style="position:absolute;left:4px">•</span>$1</div>');
+  // Paragraphs (double newline)
+  h=h.replace(/\n\n+/g,'</p><p style="margin:10px 0;line-height:1.7">');
+  // Single newlines
+  h=h.replace(/\n/g,'<br>');
+  return '<p style="margin:10px 0;line-height:1.7">'+h+'</p>';
+}
+function insertAnalysisToSession(evoId){
+  var n=(D.evolucoes||[]).find(function(x){return x.id===evoId});
+  if(!n||!n.analiseIA)return;
+  var text=cleanAIText(n.analiseIA.texto);
+  if(n.soap){n.soap.a=(n.soap.a||'')+'\n\n'+text}
+  else{n.texto=(n.texto||'')+'\n\n'+text}
+  save();
+  toast('Análise inserida nas notas da sessão');
+  hideModal();renderApp();
+}
+function insertAIToSession(idx,pacId){
+  var c=iaChats[pacId]||[];if(!c[idx])return;
+  var text=cleanAIText(c[idx].content);
+  var sessoes=(D.evolucoes||[]).filter(function(e){return e.pacienteId===pacId}).sort(function(a,b){return b.data.localeCompare(a.data)});
+  if(!sessoes.length){toast('Nenhuma sessão');return}
+  var s=sessoes[0];
+  if(s.soap){s.soap.a=(s.soap.a||'')+'\n\n'+text}else{s.texto=(s.texto||'')+'\n\n'+text}
+  save();toast('Inserido na sessão #'+sessoes.length+' ('+fmtD(s.data)+')');
+}
+
+function aiAnalyzeManual(evoId){
+  if(!getApiKey()){
+    showModal('<div class="modal-header"><h2>API Key necessária</h2><button class="close" onclick="hideModal()">&times;</button></div>'+
+    '<p style="font-size:13px;color:var(--textMuted);margin-bottom:16px">Configure sua chave da API Anthropic em Configurações para usar a IA Clínica.</p>'+
+    '<button class="btn btn-p" onclick="hideModal();go(\'config\')">Ir para Config</button>');
+    return;
+  }
+  aiAnalyzeSession(evoId);
+}
+
+// === OPTION 3: Interactive clinical agent ===
+var iaChats={};// per patient: {pacId: [{role,content},...]}
+
+function renderIAClinica(p){
+  var chatHistory=iaChats[p.id]||[];
+  var hasKey=!!getApiKey();
+  
+  var html='<div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><h3 style="font-size:16px;font-weight:600">IA Clínica</h3>';
+  if(chatHistory.length)html+='<button class="btn btn-o btn-s" onclick="iaChats[\''+p.id+'\']=[];renderApp()">Limpar</button>';
+  html+='</div>';
+  html+='<p style="font-size:12px;color:var(--textMuted);margin-bottom:12px">Análise funcional via Behaviorismo Radical e RFT. Pergunte sobre padrões comportamentais, contingências, molduras relacionais, sugestões de intervenção.</p></div>';
+  
+  if(!hasKey){
+    html+='<div class="card" style="padding:24px;text-align:center"><p style="color:var(--textMuted);margin-bottom:16px">Configure sua chave da API Anthropic em Configurações.</p><button class="btn btn-p" onclick="go(\'config\')">Configurar</button></div>';
+    return html;
+  }
+  
+  // Session summaries available
+  var evoCount=(D.evolucoes||[]).filter(function(e){return e.pacienteId===p.id}).length;
+  var transCount=(D.evolucoes||[]).filter(function(e){return e.pacienteId===p.id&&(e.transcricao||(e.arquivos&&e.arquivos.length))}).length;
+  var analyzedCount=(D.evolucoes||[]).filter(function(e){return e.pacienteId===p.id&&e.analiseIA}).length;
+  
+  html+='<div style="display:flex;gap:12px;margin-bottom:16px;font-size:12px;color:var(--textMuted)">';
+  html+='<span>'+evoCount+' sessões</span>';
+  html+='<span>'+transCount+' com transcrição</span>';
+  html+='<span>'+analyzedCount+' analisadas</span>';
+  html+='</div>';
+  
+  // Analyze unanalyzed sessions button
+  var unanalyzed=(D.evolucoes||[]).filter(function(e){return e.pacienteId===p.id&&!e.analiseIA&&(e.transcricao||e.texto||(e.soap&&(e.soap.s||e.soap.a))||(e.arquivos&&e.arquivos.length))});
+  if(unanalyzed.length){
+    html+='<button class="btn btn-o btn-s" style="margin-bottom:16px" onclick="aiBatchAnalyze(\''+p.id+'\')">Analisar '+unanalyzed.length+' sessão(ões) pendente(s)</button> ';
+  }
+  
+  // Generate full report button
+  if(analyzedCount>=2){
+    html+='<button class="btn btn-p btn-s" style="margin-bottom:16px" onclick="aiFullReport(\''+p.id+'\')">Gerar Relatório RFT Completo</button>';
+  }
+  
+  // Chat history
+  html+='<div id="iaChatHistory" style="margin-bottom:16px;max-height:50vh;overflow-y:auto">';
+  if(!chatHistory.length){
+    html+='<div style="text-align:center;padding:32px;color:var(--textLight)"><div style="font-size:28px;margin-bottom:8px">🧠</div><div style="font-size:13px">Pergunte sobre o caso clínico deste paciente.</div><div style="font-size:12px;margin-top:8px;color:var(--textFaint)">Ex: "Quais molduras de identidade estão presentes?", "Sugira uma intervenção de defusão", "Analise os padrões de esquiva"</div></div>';
+  }else{
+    chatHistory.forEach(function(msg,idx){
+      if(msg.role==='user'){
+        html+='<div style="margin-bottom:12px;display:flex;justify-content:flex-end"><div style="max-width:85%;padding:12px 16px;background:var(--primary);color:#FAF8F5;border-radius:16px 16px 4px 16px;font-size:13px;line-height:1.6">'+msg.content.replace(/</g,"&lt;")+'</div></div>';
+      }else{
+        html+='<div style="margin-bottom:12px"><div style="max-width:95%;padding:14px 18px;background:var(--surfaceAlt);border-radius:16px 16px 16px 4px;font-size:13px;color:var(--text)">'+formatAIHtml(msg.content)+'</div><div style="display:flex;gap:6px;margin-top:4px"><button class="btn btn-g btn-s" style="font-size:10px;padding:2px 8px" onclick="copyAIText('+idx+',\''+p.id+'\')">📋 Copiar</button><button class="btn btn-g btn-s" style="font-size:10px;padding:2px 8px;color:var(--accent)" onclick="insertAIToSession('+idx+',\''+p.id+'\')">📝 Inserir na sessão</button></div></div>';
+      }
     });
+  }
+  html+='</div>';
+  
+  // Loading indicator
+  html+='<div id="iaLoading" style="display:none;text-align:center;padding:16px;color:var(--textMuted)"><div style="font-size:13px">Analisando...</div></div>';
+  
+  // Input
+  html+='<div style="display:flex;gap:8px;position:sticky;bottom:0;background:var(--bg);padding:8px 0"><textarea id="iaInput" rows="2" placeholder="Pergunte sobre o caso clínico..." style="flex:1;min-height:44px;resize:none;font-size:13px" onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();iaSend(\''+p.id+'\');}"></textarea><button class="btn btn-p" onclick="iaSend(\''+p.id+'\')">Enviar</button></div>';
+  
+  return html;
+}
+
+async function iaSend(pacId){
+  var input=document.getElementById('iaInput');
+  var q=(input.value||'').trim();
+  if(!q)return;
+  
+  var p=D.pacientes.find(function(x){return x.id===pacId});
+  if(!p)return;
+  
+  if(!iaChats[pacId])iaChats[pacId]=[];
+  iaChats[pacId].push({role:'user',content:q});
+  input.value='';
+  renderApp();
+  
+  // Show loading
+  setTimeout(function(){var ld=document.getElementById('iaLoading');if(ld)ld.style.display='block';var ch=document.getElementById('iaChatHistory');if(ch)ch.scrollTop=ch.scrollHeight},50);
+  
+  try{
+    // Build context
+    var sessHistory=(D.evolucoes||[]).filter(function(e){return e.pacienteId===pacId}).sort(function(a,b){return a.data.localeCompare(b.data)}).map(function(e,i){
+      var summary='Sessão #'+(i+1)+' ('+fmtD(e.data)+'):';
+      if(e.analiseIA)summary+='\n[Análise IA]: '+e.analiseIA.texto.substring(0,400);
+      else{
+        if(e.soap){if(e.soap.s)summary+=' S:'+e.soap.s.substring(0,200);if(e.soap.a)summary+=' A:'+e.soap.a.substring(0,200)}
+        else if(e.texto)summary+=' '+e.texto.substring(0,300);
+        if(e.transcricao)summary+='\n[Transcrição parcial]: '+e.transcricao.substring(0,300);
+      }
+      if(e.humor)summary+=' Humor:'+e.humor;
+      if(e.ansiedade)summary+=' Ans:'+e.ansiedade;
+      return summary;
+    }).join('\n\n');
     
-    // Also update session calEventIds to point to the kept events
-    Object.keys(groups).forEach(function(key){
-      var evts=groups[key];
-      if(evts.length<=1)return;
-      var kept=evts[0]; // longest title
-      // Find matching session and update its calEventId
-      var parts=key.split('_');
-      var d=parts[0],h=parts[1];
-      D.sessoes.forEach(function(s){
-        if(s.data===d&&s.hora===h){
-          s.calEventId=kept.id;
-        }
-      });
-    });
+    var systemPrompt=AI_CHAT_PROMPT
+      .replace('{PATIENT_NAME}',p.nome)
+      .replace('{PATIENT_CONTEXT}',buildPatientContext(p))
+      .replace('{SESSION_HISTORY}',sessHistory||'Nenhuma sessão registrada ainda.');
+    
+    // Send full chat history
+    var messages=iaChats[pacId].map(function(m){return{role:m.role,content:m.content}});
+    
+    var result=await callClaudeAPI(messages,AI_SYSTEM_PROMPT+'\n\n'+systemPrompt);
+    
+    iaChats[pacId].push({role:'assistant',content:result});
+    renderApp();
+    setTimeout(function(){var ch=document.getElementById('iaChatHistory');if(ch)ch.scrollTop=ch.scrollHeight},100);
+  }catch(e){
+    iaChats[pacId].push({role:'assistant',content:'Erro: '+e.message});
+    renderApp();
+  }
+}
+
+var _batchRunning=false;
+async function aiBatchAnalyze(pacId){
+  if(_batchRunning){toast('Análise em lote já em andamento');return}
+  var unanalyzed=(D.evolucoes||[]).filter(function(e){return e.pacienteId===pacId&&!e.analiseIA&&(e.transcricao||e.texto||(e.soap&&(e.soap.s||e.soap.a))||(e.arquivos&&e.arquivos.length))});
+  if(!unanalyzed.length){toast('Nada para analisar');return}
+  
+  _batchRunning=true;
+  var total=unanalyzed.length;
+  var done=0,errors=0;
+  
+  // Show persistent progress bar
+  function updateProgress(){
+    var pct=Math.round((done/total)*100);
+    var bar=document.getElementById('batchProgress');
+    if(!bar){
+      var div=document.createElement('div');
+      div.id='batchProgress';
+      div.style.cssText='position:fixed;top:0;left:0;right:0;z-index:10000;background:var(--surface);padding:12px 20px;box-shadow:0 2px 12px rgba(0,0,0,.15)';
+      document.body.appendChild(div);
+      bar=div;
+    }
+    bar.innerHTML='<div style="display:flex;align-items:center;gap:12px"><div style="flex:1"><div style="font-size:13px;font-weight:600;margin-bottom:6px">Analisando sessão '+(done+1)+' de '+total+(errors?' · '+errors+' erro(s)':'')+'</div><div style="background:rgba(0,0,0,.08);border-radius:8px;height:8px;overflow:hidden"><div style="height:100%;background:var(--accent);border-radius:8px;width:'+pct+'%;transition:width .3s"></div></div></div><button class="btn btn-o btn-s" style="font-size:11px" onclick="window._batchCancel=true">Cancelar</button></div>';
+  }
+  
+  window._batchCancel=false;
+  
+  for(var i=0;i<total;i++){
+    if(window._batchCancel){toast('Análise cancelada. '+done+' de '+total+' concluídas.');break}
+    done=i;
+    updateProgress();
+    
+    try{
+      // Run analysis but suppress prontuário modal during batch
+      window._batchMode=true;
+      await aiAnalyzeSession(unanalyzed[i].id);
+      window._batchMode=false;
+    }catch(e){
+      errors++;
+      console.error('Batch error session '+(i+1)+':',e);
+      window._batchMode=false;
+    }
+    
+    // Wait between calls to respect rate limit
+    if(i<total-1&&!window._batchCancel){
+      done=i+1;updateProgress();
+      await new Promise(function(r){setTimeout(r,35000)});
+    }
+  }
+  
+  // Remove progress bar
+  var bar=document.getElementById('batchProgress');
+  if(bar)bar.remove();
+  _batchRunning=false;
+  window._batchMode=false;
+  
+  toast('Análise concluída: '+(total-errors)+' de '+total+' sessões');
+  renderApp();
+}
+
+async function aiFullReport(pacId){
+  var p=D.pacientes.find(function(x){return x.id===pacId});
+  if(!p)return;
+  
+  toast('Gerando relatório completo...');
+  
+  try{
+    var analyses=(D.evolucoes||[]).filter(function(e){return e.pacienteId===pacId&&e.analiseIA}).sort(function(a,b){return a.data.localeCompare(b.data)}).map(function(e,i){
+      return'SESSÃO #'+(i+1)+' ('+fmtD(e.data)+'):\n'+e.analiseIA.texto;
+    }).join('\n\n---\n\n');
+    
+    var prompt='Com base nas análises individuais abaixo, produza um RELATÓRIO CLÍNICO INTEGRADO seguindo esta estrutura:\n\n'+
+    '1. DADOS DO CASO\n2. DEMANDAS E QUEIXAS PRINCIPAIS\n3. ANÁLISE FUNCIONAL DO COMPORTAMENTO (comportamentos-alvo, contingências)\n4. ANÁLISE RFT (molduras de avaliação, identidade, temporais, causais)\n5. AVALIAÇÃO DO MANEJO TERAPÊUTICO\n6. SUGESTÕES DE INTERVENÇÃO\n7. PROGNÓSTICO\n\n'+
+    'Contexto do paciente:\n'+buildPatientContext(p)+'\n\n'+
+    'Análises por sessão:\n'+analyses;
+    
+    var result=await callClaudeAPI([{role:'user',content:prompt}],AI_SYSTEM_PROMPT);
+    
+    // Store and show
+    if(!p.relatorioIA)p.relatorioIA=[];
+    p.relatorioIA.push({texto:result,data:new Date().toISOString()});
     save();
     
-    toast(removed+' duplicata(s) removida(s)');
-  }catch(e){toast('Erro: '+e.message)}
+    // Show in modal
+    showModal('<div class="modal-header"><h2>Relatório RFT — '+p.nome+'</h2><button class="close" onclick="hideModal()">&times;</button></div>'+
+    '<div style="font-size:13px;line-height:1.8;white-space:pre-wrap;color:var(--text)">'+result.replace(/</g,'&lt;')+'</div>'+
+    '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:14px;border-top:1px solid rgba(0,0,0,.06)">'+
+    '<button class="btn btn-o" onclick="navigator.clipboard.writeText(document.querySelector(\'.modal div[style*=pre-wrap]\').textContent);toast(\'Copiado\')">Copiar</button>'+
+    '<button class="btn btn-p" onclick="printRelatorioIA(\''+pacId+'\')">Imprimir</button></div>');
+    
+    toast('Relatório gerado');
+  }catch(e){
+    toast('Erro: '+e.message);
+  }
 }
 
-// === TWO-WAY GOOGLE CALENDAR SYNC ===
-function calPull(){
-  if(!window.Android||!Android.readCalendarEvents||!Android.hasCalendarPermission())return;
-  try{
-    // Read events from past 30 days to next 365 days
-    var now=new Date();
-    var start=new Date(now);start.setDate(start.getDate()-30);
-    var end=new Date(now);end.setDate(end.getDate()+365);
-    var startStr=start.toISOString().split('T')[0];
-    var endStr=end.toISOString().split('T')[0];
-    var json=Android.readCalendarEvents(startStr,endStr);
-    if(!json)return;
-    var calEvents=JSON.parse(json);
-    if(!calEvents.length)return;
-    
-    var changed=false;
-    
-    // 1. Check sessions that have calEventId — did they change in GCal?
-    D.sessoes.forEach(function(s){
-      if(!s.calEventId)return;
-      var calEv=calEvents.find(function(e){return e.id==s.calEventId});
-      if(!calEv){
-        // Event was DELETED from Google Calendar — mark session
-        // Don't auto-delete, just flag it
-        return;
-      }
-      // Check if date/time changed in GCal
-      if(calEv.date!==s.data||calEv.hora!==s.hora){
-        s.data=calEv.date;
-        s.hora=calEv.hora;
-        changed=true;
-      }
-    });
-    
-    // 2. Check for NEW events in GCal that match "Clínica Fácil" pattern
-    // but don't have a matching calEventId in our sessions
-    var existingCalIds={};
-    D.sessoes.forEach(function(s){if(s.calEventId)existingCalIds[s.calEventId]=true});
-    
-    var newEvents=calEvents.filter(function(e){
-      if(existingCalIds[e.id])return false;
-      // Only import events that look like clinic sessions (title contains patient name)
-      var title=(e.title||'').toLowerCase();
-      return D.pacientes.some(function(p){return title.includes(p.nome.toLowerCase().split(' ')[0])});
-    });
-    
-    if(newEvents.length>0){
-      var names=newEvents.map(function(e){return e.title+' ('+e.date+' '+e.hora+')'}).join('\n');
-      if(confirm('Encontrei '+newEvents.length+' sessão(ões) no Google Calendar que não estão no app:\n\n'+names+'\n\nImportar?')){
-        newEvents.forEach(function(e){
-          // Try to match patient by name in title
-          var pac=D.pacientes.find(function(p){return(e.title||'').toLowerCase().includes(p.nome.toLowerCase().split(' ')[0])});
-          if(pac){
-            var exists=D.sessoes.some(function(s){return s.pacienteId===pac.id&&s.data===e.date&&s.hora===e.hora});
-            if(!exists){
-              D.sessoes.push({id:uid(),pacienteId:pac.id,data:e.date,hora:e.hora,obs:'Importado do Google Calendar',calEventId:e.id});
-              changed=true;
-            }
-          }
-        });
-      }
-    }
-    
-    if(changed){
-      syncPayments();save();renderApp();
-      toast('Agenda sincronizada com Google Calendar');
-    }
-  }catch(e){console.error('calPull error:',e)}
+function printRelatorioIA(pacId){
+  var p=D.pacientes.find(function(x){return x.id===pacId});
+  if(!p||!p.relatorioIA||!p.relatorioIA.length)return;
+  var last=p.relatorioIA[p.relatorioIA.length-1];
+  var html='<html><head><meta charset="UTF-8"><title>Relatório RFT - '+p.nome+'</title><style>body{font-family:Arial,sans-serif;padding:40px;font-size:13px;color:#333;max-width:800px;margin:0 auto;line-height:1.8}h1{font-size:18px;border-bottom:2px solid #333;padding-bottom:8px}pre{white-space:pre-wrap;font-family:inherit}</style></head><body>';
+  html+='<h1>Relatório Clínico — Análise Funcional e RFT</h1>';
+  html+='<p style="color:#888">Paciente: '+p.nome+' | Gerado: '+new Date(last.data).toLocaleDateString('pt-BR')+'</p>';
+  html+='<pre>'+last.texto+'</pre>';
+  html+='<div style="margin-top:40px;border-top:1px solid #ccc;padding-top:16px;text-align:center;color:#888;font-size:11px">'+PROF.nome+' — CRP: '+PROF.crp+'<br>Análise assistida por IA — instrumento de apoio clínico, não substitui supervisão</div>';
+  html+='</body></html>';
+  var w=window.open('','_blank');
+  if(w){w.document.write(html);w.document.close();setTimeout(function(){w.print()},500)}
 }
 
 // === Init ===
+initSupabase();
+supaRestoreSession().then(function(){if(supaUser)cloudPull().then(function(){renderApp()})});
+syncPayments();
 checkLogin();
+renderApp();
 
 </script>
 
@@ -3573,7 +4340,7 @@ checkLogin();
 <div class="field"><label>CRP *</label><input type="text" id="profCRP" placeholder="Ex: 06/123456"></div>
 <button class="btn btn-p" style="width:100%;padding:14px;font-size:16px;margin-top:12px" onclick="saveLogin()">Entrar</button>
 </div>
-<p style="text-align:center;color:var(--textMuted);font-size:11px;margin-top:20px;line-height:1.6">Seus dados são armazenados apenas localmente neste dispositivo, em conformidade com a LGPD.</p>
+<p style="text-align:center;color:var(--textMuted);font-size:11px;margin-top:20px;line-height:1.6">Seus dados são armazenados localmente neste dispositivo. Backups opcionais via Google Drive pessoal. Em conformidade com a LGPD.</p>
 </div></div>
 </body>
 </html>
